@@ -39,6 +39,13 @@ flowchart LR
    - `reports/{store}.html` (from template, no LLM tokens)
    - `eval/scores/{store}.json`
    - `reports/index.html` when both stores are audited
+  
+
+## Screenshots
+<img width="1798" height="1054" alt="image" src="https://github.com/user-attachments/assets/dcfc4f5c-aff1-4c21-9618-cc9fb1d3bff1" />
+<img width="2374" height="1296" alt="image" src="https://github.com/user-attachments/assets/5f7c1552-5cc1-484b-bfce-f55d514f5165" />
+<img width="2018" height="1252" alt="image" src="https://github.com/user-attachments/assets/0f91bbf2-81e2-4a8f-a92c-b6518296c3b9" />
+
 
 ## Crawl helpers
 
