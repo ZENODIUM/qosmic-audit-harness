@@ -1,0 +1,34 @@
+# --- Secrets (never commit) ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.pyc
+.Python
+.venv/
+venv/
+
+# --- Crawl artifacts: manifests only (re-run discover_store.py to regenerate) ---
+artifacts/**/*
+!artifacts/.gitkeep
+!artifacts/**/manifest.json
+
+# Screenshots are large — regenerate with discover_store.py or capture_audit_screenshots.py
+**/screenshots/
+reports/assets/
+
+# --- Optional local run notes (token counts, timing) ---
+runs/**/*
+!runs/RUN_TEMPLATE.json
+
+# --- OS / editor noise ---
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# --- Local docs / assignment copy (not pushed) ---
+misc/

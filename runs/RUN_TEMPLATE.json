@@ -1,0 +1,8 @@
+{
+  "store": "example.com",
+  "started_at": "2026-06-04T21:00:00Z",
+  "completed_at": "2026-06-04T21:25:00Z",
+  "cursor_tokens_input": null,
+  "cursor_tokens_output": null,
+  "notes": "Paste token usage from Cursor UI after the audit session (Settings → Usage or chat footer)."
+}

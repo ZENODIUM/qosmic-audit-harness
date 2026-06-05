@@ -1,0 +1,52 @@
+{
+  "store": "touchland",
+  "report_path": "V:\\Projects\\takehome\\reports\\touchland.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [],
+  "grounded": {
+    "SSL Certificate": {
+      "status": "Pass",
+      "detail": "Valid certificate; expires Aug 25 09:31:01 2026 GMT"
+    },
+    "HTTPS Redirect": {
+      "status": "Pass",
+      "detail": "HTTP redirects to HTTPS (301)"
+    },
+    "Robots.txt": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Sitemap": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Meta Tags & Social Previews": {
+      "status": "Warn",
+      "detail": "title missing; meta description missing; Open Graph missing; favicon not found"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "68/100 on PageSpeed Insights (desktop)"
+    },
+    "Page Speed Mobile": {
+      "status": "Warn",
+      "detail": "Could not verify \u2014 HTTPSConnectionPool(host='www.googleapis.com', port=443): Read timed out. (read timeout=90)"
+    }
+  }
+}

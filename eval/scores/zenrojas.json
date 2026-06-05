@@ -1,0 +1,52 @@
+{
+  "store": "zenrojas",
+  "report_path": "V:\\Projects\\takehome\\reports\\zenrojas.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [],
+  "grounded": {
+    "SSL Certificate": {
+      "status": "Warn",
+      "detail": "Could not verify \u2014 [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)"
+    },
+    "HTTPS Redirect": {
+      "status": "Pass",
+      "detail": "HTTP redirects to HTTPS (301)"
+    },
+    "Sitemap": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Robots.txt": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Page Speed Mobile": {
+      "status": "Pass",
+      "detail": "66/100 on PageSpeed Insights (mobile)"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "78/100 on PageSpeed Insights (desktop)"
+    },
+    "Meta Tags & Social Previews": {
+      "status": "Pass",
+      "detail": "title present; meta description present; Open Graph tags present; favicon not found"
+    }
+  }
+}

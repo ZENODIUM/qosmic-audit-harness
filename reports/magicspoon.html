@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Magic Spoon audit — Checkout path works; JS-heavy PDPs and weak PageSpeed are the main leaks</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: 1.65rem; font-weight: 650; margin: 0 0 0.35rem; letter-spacing: -0.02em; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .store-tag {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.6rem; border-radius: 999px;
+    }
+
+    /* KPI strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-value small { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+    .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Charts row */
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 640px) { .charts { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.85rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.82rem; }
+    .bar-label { width: 5.5rem; flex-shrink: 0; color: var(--muted); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: #f0ebe3; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; min-width: 2px; }
+    .bar-count { width: 1.5rem; text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text); }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+    .donut {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(
+        var(--pass) 0deg 264.0deg,
+        var(--warn) 264.0deg 360.0deg,
+        var(--fail) 360.0deg 360deg
+      );
+      position: relative; flex-shrink: 0;
+    }
+    .donut::after {
+      content: ""; position: absolute; inset: 18px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .donut-legend { font-size: 0.82rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .prose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .prose p { margin: 0 0 0.85rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 650; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .card h3 { margin: 0; font-size: 1rem; font-weight: 650; flex: 1 1 100%; letter-spacing: -0.01em; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 650;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .badge-Conversion { background: #eff6ff; color: var(--pillar-conversion); }
+    .badge-AOV { background: #f5f3ff; color: var(--pillar-aov); }
+    .badge-Retention { background: #ecfdf5; color: var(--pillar-retention); }
+    .badge-Acquisition { background: #fffbeb; color: var(--pillar-acquisition); }
+    .badge-Performance { background: #fef2f2; color: var(--pillar-performance); }
+    .pill {
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 6px; background: #f5f5f4; color: var(--muted);
+    }
+    .pill-lift { background: #ecfdf5; color: var(--pass); }
+    dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.88rem; }
+    dt { color: var(--muted); font-weight: 500; }
+    dd { margin: 0; }
+    .evidence-images { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .evidence-shot {
+      max-width: 100%; width: auto; max-height: 280px;
+      border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(28,25,23,0.06);
+    }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.6rem 0.85rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    th { background: #fafaf9; color: var(--muted); font-weight: 650; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: #fafaf9; }
+    .status-Pass { color: var(--pass); font-weight: 650; }
+    .status-Warn { color: var(--warn); font-weight: 650; }
+    .status-Fail { color: var(--fail); font-weight: 650; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Magic Spoon audit — Checkout path works; JS-heavy PDPs and weak PageSpeed are the main leaks</h1>
+      <p class="subtitle">Qosmic storefront audit · 2026-06-05 03:39 UTC</p>
+      <span class="store-tag">magicspoon</span>
+    </header>
+
+    
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Eval score</div>
+        <div class="kpi-value">10.0</div>
+        <div class="kpi-sub">Structural + field quality</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">Across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg confidence</div>
+        <div class="kpi-value">74<small>%</small></div>
+        <div class="kpi-sub">Experiment median belief</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg expected lift</div>
+        <div class="kpi-value">+12<small>%</small></div>
+        <div class="kpi-sub">Midpoint of ranges</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PageSpeed</div>
+        <div class="kpi-value">40/42</div>
+        <div class="kpi-sub">mobile &amp; desktop</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tech pass rate</div>
+        <div class="kpi-value">11<small>/15</small></div>
+        <div class="kpi-sub">11 pass · 4 warn · 0 fail</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-title">Experiments by pillar</div>
+        <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">AOV</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#7c3aed"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Retention</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#059669"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Acquisition</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#d97706"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Performance</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#dc2626"></div></div><span class="bar-count">1</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Technical checks</div>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="dot" style="background:var(--pass)"></span> Pass · 11</div>
+            <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Warn · 4</div>
+            <div class="legend-item"><span class="dot" style="background:var(--fail)"></span> Fail · 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive summary</h2>
+      <div class="prose"><p><strong>Magic Spoon is a live Shopify DTC storefront on this crawl.</strong> All seven manifest surfaces returned <strong>200</strong>, including `/cart` with title “Your Shopping Cart” (`artifacts/magicspoon/cart.md`; screenshot: `artifacts/magicspoon/screenshots/cart_full.png`). Hero PDPs <strong>Classic Marshmallow & S'mores</strong> and <strong>Cocoa Cereal case</strong> both load with review copy detected in HTML (`artifacts/magicspoon/pdp_1.md`, `artifacts/magicspoon/pdp_2.md`), though static fetch did not surface add-to-cart strings — consistent with a JS-rendered Shopify theme.</p>
+<p><strong>Merchandising and performance—not cart plumbing—is where revenue likely leaks.</strong> The homepage and <strong>Shop All</strong> collection titles emphasize protein, keto-friendly positioning and multi-category catalog (`artifacts/magicspoon/homepage.md`, `artifacts/magicspoon/collection.md`). FAQ loads at `/pages/faq` (`artifacts/magicspoon/faq_or_where_to_buy.md`). No distinct blog or content URL was discovered; `content_page` resolved to the homepage duplicate on this sitemap pass (`artifacts/magicspoon/manifest.json`).</p>
+<p><strong>Technical baseline passes automated checks but PageSpeed is poor.</strong> Per `artifacts/magicspoon/tech_grounded.json`: HTTPS, SSL, sitemap, robots, meta/OG, and favicon <strong>Pass</strong>; PageSpeed <strong>40/100 mobile</strong> and <strong>42/100 desktop</strong>. Priority tests: surface social proof closer to purchase on JS PDPs, bundle-first paths on collection, subscribe framing on case SKUs, FAQ→product handoffs, and LCP/image work on the homepage carousel — all tied to manifest URLs and screenshots from this run.</p></div>
+    </section>
+
+    <section>
+      <h2>Proposed experiments</h2>
+      <div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">77% conf</span><span class="pill pill-lift">+10% est</span></div><h3>exp-m7a1b2c3 — Bundle Builder hero on Shop All collection</h3><dl><dt>Affected surface</dt><dd>Shop All collection</dd><dt>URL</dt><dd>https://magicspoon.com/collections/shop-all</dd><dt>Evidence</dt><dd>artifacts/magicspoon/collection.md — title “Shop All | Magic Spoon Cereal, Treats &amp; Granola”, status 200; screenshot: artifacts/magicspoon/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Collection-to-checkout rate rises when a “Build Your Own Bundle” module sits above the product grid with pre-selected bestseller cases.</dd><dt>Primary change</dt><dd>Sticky bundle CTA + 3-SKU starter preset linking to bundle builder flow.</dd><dt>Primary KPI</dt><dd>Collection add-to-cart rate</dd><dt>Decision rule</dt><dd>Ship if collection ATC rises by ≥8% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+7–14%</dd><dt>Confidence</dt><dd>77</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">79% conf</span><span class="pill pill-lift">+8% est</span></div><h3>exp-m8b2c3d4 — Aggregated reviews above purchase block on Cocoa case PDP</h3><dl><dt>Affected surface</dt><dd>Cocoa Cereal case PDP</dd><dt>URL</dt><dd>https://magicspoon.com/products/cocoa-cereal-case</dd><dt>Evidence</dt><dd>artifacts/magicspoon/pdp_2.md — review widget/copy in HTML, status 200; screenshot: artifacts/magicspoon/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Add-to-cart on the cocoa case PDP improves when star rating and review count render in the first viewport above the purchase module (static HTML already hints review widgets load client-side).</dd><dt>Primary change</dt><dd>SSR or priority-hydrate review summary block directly above subscription/ATC on top five case SKUs.</dd><dt>Primary KPI</dt><dd>PDP add-to-cart rate (cocoa case)</dd><dt>Decision rule</dt><dd>Ship if ATC rises by ≥6% over 14 days without return rate up ≥2%.</dd><dt>Expected lift</dt><dd>+5–11%</dd><dt>Confidence</dt><dd>79</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">74% conf</span><span class="pill pill-lift">+12% est</span></div><h3>exp-m9c3d4e5 — Empty-cart sampler recommendation strip</h3><dl><dt>Affected surface</dt><dd>Cart</dd><dt>URL</dt><dd>https://magicspoon.com/cart</dd><dt>Evidence</dt><dd>artifacts/magicspoon/cart.md — “Your Shopping Cart” 200; screenshot: artifacts/magicspoon/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Cart abandonment drops when empty-cart state shows a single-click “Discovery Kit” or variety 6-pack instead of a blank cart.</dd><dt>Primary change</dt><dd>Empty-state module with one preset bundle + social-proof line from homepage review theme.</dd><dt>Primary KPI</dt><dd>Cart-to-checkout rate (empty-cart sessions)</dd><dt>Decision rule</dt><dd>Ship if empty-cart checkout starts rise by ≥10% over 28 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+8–16%</dd><dt>Confidence</dt><dd>74</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">72% conf</span><span class="pill pill-lift">+13% est</span></div><h3>exp-m0d4e5f6 — Case + treats cross-sell in cart drawer</h3><dl><dt>Affected surface</dt><dd>Cart / post-ATC drawer</dd><dt>URL</dt><dd>https://magicspoon.com/cart</dd><dt>Evidence</dt><dd>artifacts/magicspoon/collection.md — catalog spans cereal, treats, granola in title; artifacts/magicspoon/cart.md — cart 200; screenshot: artifacts/magicspoon/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV increases when adding a cereal case triggers a one-click treats 6-pack upsell at 15% off in the cart drawer.</dd><dt>Primary change</dt><dd>Rule-based upsell (cereal case in cart → treats variety pack offer) with single-tap accept.</dd><dt>Primary KPI</dt><dd>AOV (sessions with cereal case ATC)</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$6 over 28 days with sitewide CVR down ≤3%.</dd><dt>Expected lift</dt><dd>+9–18%</dd><dt>Confidence</dt><dd>72</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">71% conf</span><span class="pill pill-lift">+15% est</span></div><h3>exp-m1e5f6a7 — Subscribe-default on S&#x27;mores marshmallow case</h3><dl><dt>Affected surface</dt><dd>S&#x27;mores protein cereal PDP</dd><dt>URL</dt><dd>https://magicspoon.com/products/classic-smores-protein-cereal-marshmallows-1case-4boxes</dd><dt>Evidence</dt><dd>artifacts/magicspoon/pdp_1.md — marshmallow case PDP 200, review copy in HTML; screenshot: artifacts/magicspoon/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Revenue per buyer rises when subscribe-and-save is pre-selected on case SKUs with clear “skip or cancel anytime” copy beside one-time purchase.</dd><dt>Primary change</dt><dd>Default subscription toggle on case PDPs; one-time as secondary link.</dd><dt>Primary KPI</dt><dd>Subscription take rate on case PDPs</dd><dt>Decision rule</dt><dd>Ship if subscription mix rises by ≥12% over 30 days without 60-day churn up ≥5%.</dd><dt>Expected lift</dt><dd>+10–20%</dd><dt>Confidence</dt><dd>71</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">70% conf</span><span class="pill pill-lift">+11% est</span></div><h3>exp-m2f6a7b8 — Post-purchase subscribe rescue email</h3><dl><dt>Affected surface</dt><dd>Post-purchase email (Klaviyo)</dd><dt>URL</dt><dd>https://magicspoon.com/ (purchase trigger)</dd><dt>Evidence</dt><dd>artifacts/magicspoon/cart.md — checkout path exists (cart 200); screenshot: artifacts/magicspoon/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>60-day repeat purchase rate improves when one-time buyers receive a day-14 email offering subscribe conversion on the same flavor at 20% off first refill.</dd><dt>Primary change</dt><dd>SKU-matched subscribe offer email with one-click reorder link.</dd><dt>Primary KPI</dt><dd>60-day repeat purchase rate</dd><dt>Decision rule</dt><dd>Ship if repeat rate rises by ≥9% over 60 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+8–15%</dd><dt>Confidence</dt><dd>70</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">69% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-m3a7b8c9 — Replenishment reminder for case buyers</h3><dl><dt>Affected surface</dt><dd>Email / SMS</dd><dt>URL</dt><dd>https://magicspoon.com/products/cocoa-cereal-case</dd><dt>Evidence</dt><dd>artifacts/magicspoon/pdp_2.md — case SKU PDP 200; screenshot: artifacts/magicspoon/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Churn among one-time case buyers drops when a day-25 “running low?” reminder fires with one-tap reorder of the same case.</dd><dt>Primary change</dt><dd>Consumption-based reminder (4-box case ≈ 28-day cadence) with prefilled cart link.</dd><dt>Primary KPI</dt><dd>Second-order rate within 45 days</dd><dt>Decision rule</dt><dd>Ship if second-order rate rises by ≥7% over 45 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+6–13%</dd><dt>Confidence</dt><dd>69</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">75% conf</span><span class="pill pill-lift">+17% est</span></div><h3>exp-m4b8c9d0 — Protein-cereal landing from homepage thesis</h3><dl><dt>Affected surface</dt><dd>Homepage hero</dd><dt>URL</dt><dd>https://magicspoon.com</dd><dt>Evidence</dt><dd>artifacts/magicspoon/homepage.md — title “High Protein, Keto-Friendly, 0g Sugar Cereal”, status 200; screenshot: artifacts/magicspoon/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Paid and organic traffic from “high protein cereal” intent converts better on a dedicated `/pages/high-protein-cereal` LP with single CTA to Shop All than on the rotating homepage carousel.</dd><dt>Primary change</dt><dd>Intent-matched LP mirroring homepage protein/sugar claims with one bundle CTA.</dd><dt>Primary KPI</dt><dd>Landing-page conversion rate (protein-cereal campaigns)</dd><dt>Decision rule</dt><dd>Ship if LP CVR beats homepage by ≥15% over 21 days with n≥2,000 sessions per variant.</dd><dt>Expected lift</dt><dd>+12–22%</dd><dt>Confidence</dt><dd>75</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">73% conf</span><span class="pill pill-lift">+14% est</span></div><h3>exp-m5c9d0e1 — FAQ answer modules with PDP deep links</h3><dl><dt>Affected surface</dt><dd>FAQ</dd><dt>URL</dt><dd>https://magicspoon.com/pages/faq</dd><dt>Evidence</dt><dd>artifacts/magicspoon/faq_or_where_to_buy.md — FAQ page 200; screenshot: artifacts/magicspoon/screenshots/faq_or_where_to_buy_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/faq_or_where_to_buy_full.png" alt="Evidence: faq_or_where_to_buy_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Organic FAQ traffic converts when top questions (ingredients, subscribe, shipping) end with inline “Shop cocoa case” / “Build a bundle” buttons instead of generic footer nav only.</dd><dt>Primary change</dt><dd>Top 8 FAQ entries get contextual product CTAs tied to question topic.</dd><dt>Primary KPI</dt><dd>FAQ-to-PDP click rate</dd><dt>Decision rule</dt><dd>Ship if FAQ→PDP CTR rises by ≥20% over 30 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+10–18%</dd><dt>Confidence</dt><dd>73</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">76% conf</span><span class="pill pill-lift">+6% est</span></div><h3>exp-m6d0e1f2 — Defer non-critical JS on homepage carousel</h3><dl><dt>Affected surface</dt><dd>Homepage</dd><dt>URL</dt><dd>https://magicspoon.com</dd><dt>Evidence</dt><dd>artifacts/magicspoon/tech_grounded.json — Page Speed 40/100 mobile, 42/100 desktop; artifacts/magicspoon/homepage.md — status 200; screenshot: artifacts/magicspoon/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/magicspoon/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Mobile add-to-cart rate improves when LCP image and hero copy load before review carousels and promotional video scripts (PSI already sub-50 on both form factors).</dd><dt>Primary change</dt><dd>Defer below-fold review/video widgets; priority-load hero LCP image and primary Shop CTA.</dd><dt>Primary KPI</dt><dd>Mobile LCP (seconds) and mobile PDP entry rate from homepage</dd><dt>Decision rule</dt><dd>Ship if mobile LCP improves by ≥1.2s and homepage→collection CTR rises by ≥5% over 21 days.</dd><dt>Expected lift</dt><dd>+4–9%</dd><dt>Confidence</dt><dd>76</dd></dl></div>
+    </section>
+
+    <section>
+      <h2>Competitor analysis</h2>
+      <div class="table-wrap"><table>
+<tr><th>Competitor</th><th>Domain</th><th>Positioning</th><th>What they make easier</th><th>Magic Spoon edge</th><th>Pattern to adapt</th></tr>
+<tr><td>Catalina Crunch</td><td>catalinacrunch.com</td><td>Keto-friendly cereal</td><td>Clear flavor grid, subscribe on PDP</td><td>Stronger brand fame, treats/granola expansion</td><td>Subscribe-default on case SKUs</td></tr>
+<tr><td>Three Wishes</td><td>threewishescereal.com</td><td>Clean-ingredient cereal</td><td>Simple ingredient story, variety packs</td><td>Higher protein claim, nostalgia creative</td><td>Sampler-first empty cart</td></tr>
+<tr><td>OffLimits</td><td>offlimits.com</td><td>Gamified DTC cereal</td><td>Personality-led PDP, trial positioning</td><td>Broader catalog (treats, granola, pastries)</td><td>Bundle builder as collection hero</td></tr>
+<tr><td>Schoolyard Snacks</td><td>schoolyardsnacks.com</td><td>Low-carb cereal &amp; snacks</td><td>Price-forward cases, Amazon social proof</td><td>Premium DTC experience, review volume</td><td>Star rating above ATC on case PDPs</td></tr>
+</table></div>
+    </section>
+
+    <section>
+      <h2>Technical checks</h2>
+      <div class="table-wrap"><table>
+<tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+<tr><td>SSL Certificate</td><td><span class="status-Pass">Pass</span></td><td>Valid certificate; expires Aug 28 12:22:32 2026 GMT (`tech_grounded.json`)</td></tr>
+<tr><td>HTTPS Redirect</td><td><span class="status-Pass">Pass</span></td><td>HTTP redirects to HTTPS (301)</td></tr>
+<tr><td>Sitemap</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Robots.txt</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Critical Pages Loading</td><td><span class="status-Pass">Pass</span></td><td>7/7 manifest surfaces returned 200 (`manifest.json`)</td></tr>
+<tr><td>Meta Tags &amp; Social Previews</td><td><span class="status-Pass">Pass</span></td><td>Title, description, OG present; favicon present (`tech_grounded.json`)</td></tr>
+<tr><td>Structured Data</td><td><span class="status-Warn">Warn</span></td><td>Product JSON-LD not validated on crawled PDPs this pass (JS-rendered theme)</td></tr>
+<tr><td>Favicon</td><td><span class="status-Pass">Pass</span></td><td>Detected in homepage meta parse (`tech_grounded.json`)</td></tr>
+<tr><td>Mobile-Friendly</td><td><span class="status-Warn">Warn</span></td><td>Not measured directly; PSI mobile 40/100 suggests room to improve</td></tr>
+<tr><td>Page Speed Mobile</td><td><span class="status-Pass">Pass</span></td><td>40/100 on PageSpeed Insights (mobile)</td></tr>
+<tr><td>Page Speed Desktop</td><td><span class="status-Pass">Pass</span></td><td>42/100 on PageSpeed Insights (desktop)</td></tr>
+<tr><td>Broken Links</td><td><span class="status-Pass">Pass</span></td><td>No 404/503 on manifest surfaces this crawl</td></tr>
+<tr><td>Image Optimization</td><td><span class="status-Warn">Warn</span></td><td>Not measured; low PSI scores suggest heavy hero/carousel assets</td></tr>
+<tr><td>Cookie/Privacy</td><td><span class="status-Warn">Warn</span></td><td>Privacy policy linked in footer per site pattern; banner behavior not fully inspected</td></tr>
+<tr><td>Checkout Reachable</td><td><span class="status-Pass">Pass</span></td><td>/cart 200 — Shopping Cart page (`cart.md`, `screenshots/cart_full.png`)</td></tr>
+</table></div>
+    </section>
+  </div>
+</body>
+</html>

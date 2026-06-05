@@ -1,0 +1,23 @@
+{
+  "scored_stores": [
+    "diasporaco",
+    "gingerpeople",
+    "graza",
+    "touchland",
+    "zenrojas"
+  ],
+  "store_count": 5,
+  "threshold_pct": 50,
+  "recurring": [],
+  "one_off": [
+    {
+      "flag": "psi_mismatch_desktop:report=44 grounded=61",
+      "stores": [
+        "gingerpeople"
+      ],
+      "rate_pct": 20.0,
+      "suggested_skill": "skills/write.md"
+    }
+  ],
+  "generated_at": "2026-06-05T01:21:49.789845+00:00"
+}

@@ -1,0 +1,32 @@
+{
+  "store": "graza",
+  "report_path": "V:\\Projects\\takehome\\reports\\graza.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [],
+  "grounded": {
+    "Page Speed Mobile": {
+      "status": "Pass",
+      "detail": "47/100 on PageSpeed Insights (mobile)"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "36/100 on PageSpeed Insights (desktop)"
+    }
+  }
+}

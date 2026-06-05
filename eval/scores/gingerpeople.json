@@ -1,0 +1,54 @@
+{
+  "store": "gingerpeople",
+  "report_path": "V:\\Projects\\takehome\\reports\\gingerpeople.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [
+    "psi_mismatch_desktop:report=44 grounded=61"
+  ],
+  "grounded": {
+    "HTTPS Redirect": {
+      "status": "Pass",
+      "detail": "HTTP redirects to HTTPS (301)"
+    },
+    "SSL Certificate": {
+      "status": "Pass",
+      "detail": "Valid certificate; expires Jul 20 06:12:48 2026 GMT"
+    },
+    "Robots.txt": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Meta Tags & Social Previews": {
+      "status": "Pass",
+      "detail": "title present; meta description present; Open Graph tags present; favicon present"
+    },
+    "Sitemap": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "61/100 on PageSpeed Insights (desktop)"
+    },
+    "Page Speed Mobile": {
+      "status": "Pass",
+      "detail": "28/100 on PageSpeed Insights (mobile)"
+    }
+  }
+}

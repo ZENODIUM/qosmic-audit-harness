@@ -1,0 +1,52 @@
+{
+  "store": "diasporaco",
+  "report_path": "V:\\Projects\\takehome\\reports\\diasporaco.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [],
+  "grounded": {
+    "HTTPS Redirect": {
+      "status": "Pass",
+      "detail": "HTTP redirects to HTTPS (301)"
+    },
+    "SSL Certificate": {
+      "status": "Pass",
+      "detail": "Valid certificate; expires Aug 28 07:07:33 2026 GMT"
+    },
+    "Sitemap": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Robots.txt": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Meta Tags & Social Previews": {
+      "status": "Pass",
+      "detail": "title present; meta description present; Open Graph tags present; favicon present"
+    },
+    "Page Speed Mobile": {
+      "status": "Pass",
+      "detail": "41/100 on PageSpeed Insights (mobile)"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "54/100 on PageSpeed Insights (desktop)"
+    }
+  }
+}

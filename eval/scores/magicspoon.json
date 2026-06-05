@@ -1,0 +1,52 @@
+{
+  "store": "magicspoon",
+  "report_path": "V:\\Projects\\takehome\\reports\\magicspoon.md",
+  "scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0
+  },
+  "counts": {
+    "experiments": 10,
+    "pillars": [
+      "AOV",
+      "Acquisition",
+      "Conversion",
+      "Performance",
+      "Retention"
+    ],
+    "competitor_rows": 4,
+    "technical_rows": 15
+  },
+  "flags": [],
+  "grounded": {
+    "SSL Certificate": {
+      "status": "Pass",
+      "detail": "Valid certificate; expires Aug 28 12:22:32 2026 GMT"
+    },
+    "HTTPS Redirect": {
+      "status": "Pass",
+      "detail": "HTTP redirects to HTTPS (301)"
+    },
+    "Sitemap": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Meta Tags & Social Previews": {
+      "status": "Pass",
+      "detail": "title present; meta description present; Open Graph tags present; favicon present"
+    },
+    "Robots.txt": {
+      "status": "Pass",
+      "detail": "Returns 200"
+    },
+    "Page Speed Mobile": {
+      "status": "Pass",
+      "detail": "40/100 on PageSpeed Insights (mobile)"
+    },
+    "Page Speed Desktop": {
+      "status": "Pass",
+      "detail": "42/100 on PageSpeed Insights (desktop)"
+    }
+  }
+}

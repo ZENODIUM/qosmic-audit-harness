@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Touchland audit — checkout works; scent discovery and mobile meta are the gaps</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: 1.65rem; font-weight: 650; margin: 0 0 0.35rem; letter-spacing: -0.02em; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .store-tag {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.6rem; border-radius: 999px;
+    }
+
+    /* KPI strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-value small { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+    .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Charts row */
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 640px) { .charts { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.85rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.82rem; }
+    .bar-label { width: 5.5rem; flex-shrink: 0; color: var(--muted); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: #f0ebe3; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; min-width: 2px; }
+    .bar-count { width: 1.5rem; text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text); }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+    .donut {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(
+        var(--pass) 0deg 192.0deg,
+        var(--warn) 192.0deg 360.0deg,
+        var(--fail) 360.0deg 360deg
+      );
+      position: relative; flex-shrink: 0;
+    }
+    .donut::after {
+      content: ""; position: absolute; inset: 18px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .donut-legend { font-size: 0.82rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .prose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .prose p { margin: 0 0 0.85rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 650; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .card h3 { margin: 0; font-size: 1rem; font-weight: 650; flex: 1 1 100%; letter-spacing: -0.01em; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 650;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .badge-Conversion { background: #eff6ff; color: var(--pillar-conversion); }
+    .badge-AOV { background: #f5f3ff; color: var(--pillar-aov); }
+    .badge-Retention { background: #ecfdf5; color: var(--pillar-retention); }
+    .badge-Acquisition { background: #fffbeb; color: var(--pillar-acquisition); }
+    .badge-Performance { background: #fef2f2; color: var(--pillar-performance); }
+    .pill {
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 6px; background: #f5f5f4; color: var(--muted);
+    }
+    .pill-lift { background: #ecfdf5; color: var(--pass); }
+    dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.88rem; }
+    dt { color: var(--muted); font-weight: 500; }
+    dd { margin: 0; }
+    .evidence-images { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .evidence-shot {
+      max-width: 100%; width: auto; max-height: 280px;
+      border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(28,25,23,0.06);
+    }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.6rem 0.85rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    th { background: #fafaf9; color: var(--muted); font-weight: 650; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: #fafaf9; }
+    .status-Pass { color: var(--pass); font-weight: 650; }
+    .status-Warn { color: var(--warn); font-weight: 650; }
+    .status-Fail { color: var(--fail); font-weight: 650; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Touchland audit — checkout works; scent discovery and mobile meta are the gaps</h1>
+      <p class="subtitle">Qosmic storefront audit · 2026-06-05 00:39 UTC</p>
+      <span class="store-tag">touchland</span>
+    </header>
+
+    
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Eval score</div>
+        <div class="kpi-value">10.0</div>
+        <div class="kpi-sub">Structural + field quality</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">Across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg confidence</div>
+        <div class="kpi-value">74<small>%</small></div>
+        <div class="kpi-sub">Experiment median belief</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg expected lift</div>
+        <div class="kpi-value">+9<small>%</small></div>
+        <div class="kpi-sub">Midpoint of ranges</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PageSpeed</div>
+        <div class="kpi-value">68/100</div>
+        <div class="kpi-sub">PageSpeed</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tech pass rate</div>
+        <div class="kpi-value">8<small>/15</small></div>
+        <div class="kpi-sub">8 pass · 7 warn · 0 fail</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-title">Experiments by pillar</div>
+        <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">AOV</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#7c3aed"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Retention</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#059669"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Acquisition</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#d97706"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Performance</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#dc2626"></div></div><span class="bar-count">1</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Technical checks</div>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="dot" style="background:var(--pass)"></span> Pass · 8</div>
+            <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Warn · 7</div>
+            <div class="legend-item"><span class="dot" style="background:var(--fail)"></span> Fail · 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive summary</h2>
+      <div class="prose"><p><strong>Note:</strong> `touchlandusa.com` did not resolve on this crawl; the live DTC storefront is <strong>touchland.com</strong> (Touchland LLC, Miami). All seven manifest surfaces returned 200, including `/cart` with a working cart page (`artifacts/touchland/cart.md`; screenshot: `artifacts/touchland/screenshots/cart_full.png`). Hero PDPs <strong>Applelicious Power Mist</strong> and <strong>Beach Coco Power Mist</strong> both show add-to-cart in HTML (`artifacts/touchland/pdp_1.md`, `artifacts/touchland/pdp_2.md`) with matching screenshots and review-widget copy.</p>
+<p><strong>Merchandising is bundle- and collab-heavy, not broken.</strong> The homepage and `/collections/bundles` load (`artifacts/touchland/homepage.md`, `artifacts/touchland/collection.md`) with ATC present in static notes. The blog hub loads (`artifacts/touchland/content_page.md`) as a separate content surface. Live catalog patterns include sold-out special editions and mist+case sets — a scent-discovery and availability story more than a checkout-plumbing problem.</p>
+<p><strong>Technical baseline is mixed.</strong> SSL, HTTPS, sitemap, and robots pass per `artifacts/touchland/tech_grounded.json`; <strong>meta title, description, and Open Graph were missing</strong> in the homepage static fetch (likely JS-rendered). PageSpeed <strong>68/100 desktop</strong>; mobile PSI timed out this run. Priority tests: scent-quiz first purchase, case upsell on hero mists, bundle-led collection, blog→product modules, and mobile meta/LCP — tied to URLs and screenshots from this run.</p></div>
+    </section>
+
+    <section>
+      <h2>Proposed experiments</h2>
+      <div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">77% conf</span><span class="pill pill-lift">+12% est</span></div><h3>exp-t1a2b3c4 — Scent quiz hero for cold traffic</h3><dl><dt>Affected surface</dt><dd>Homepage</dd><dt>URL</dt><dd>https://touchland.com</dd><dt>Evidence</dt><dd>artifacts/touchland/homepage.md — ATC and review copy in HTML; screenshot: artifacts/touchland/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Homepage→PDP CTR rises when cold visitors land on a 3-question scent quiz that recommends a Power Mist SKU instead of a generic hero carousel.</dd><dt>Primary change</dt><dd>Default hero = interactive scent quiz with direct add links to top three in-stock mists.</dd><dt>Primary KPI</dt><dd>Homepage click-through rate to PDP</dd><dt>Decision rule</dt><dd>Ship if homepage CTR rises by ≥10% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+8–16%</dd><dt>Confidence</dt><dd>77</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">79% conf</span><span class="pill pill-lift">+7% est</span></div><h3>exp-t2b3c4d5 — Review summary above ATC on Applelicious</h3><dl><dt>Affected surface</dt><dd>Applelicious Power Mist PDP</dd><dt>URL</dt><dd>https://touchland.com/products/applelicious-power-mist</dd><dt>Evidence</dt><dd>artifacts/touchland/pdp_1.md — add-to-cart and review widget in HTML; screenshot: artifacts/touchland/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Add-to-cart rate improves when aggregated star rating and review count render directly above the primary ATC on Applelicious Power Mist.</dd><dt>Primary change</dt><dd>Move review summary block above ATC on top five Power Mist SKUs by sessions.</dd><dt>Primary KPI</dt><dd>Add-to-cart rate (Applelicious PDP)</dd><dt>Decision rule</dt><dd>Ship if ATC rises by ≥5% over 14 days without return rate up ≥2%.</dd><dt>Expected lift</dt><dd>+4–10%</dd><dt>Confidence</dt><dd>79</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">74% conf</span><span class="pill pill-lift">+12% est</span></div><h3>exp-t3c4d5e6 — Mist case upsell on Beach Coco PDP</h3><dl><dt>Affected surface</dt><dd>Beach Coco Power Mist PDP</dd><dt>URL</dt><dd>https://touchland.com/products/beach-coco-power-mist</dd><dt>Evidence</dt><dd>artifacts/touchland/pdp_2.md — Beach Coco PDP 200, ATC in HTML; screenshot: artifacts/touchland/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV increases when single-mist buyers see a one-click “Add matching Mist Case” module with bundle savings on the PDP.</dd><dt>Primary change</dt><dd>Inline case upsell card below variant selector with compare-at pricing.</dd><dt>Primary KPI</dt><dd>AOV (Beach Coco PDP sessions)</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$4 over 28 days with sitewide CVR down ≤3%.</dd><dt>Expected lift</dt><dd>+9–15%</dd><dt>Confidence</dt><dd>74</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">73% conf</span><span class="pill pill-lift">+10% est</span></div><h3>exp-t4d5e6f7 — Bundle-first row on bundles collection</h3><dl><dt>Affected surface</dt><dd>Bundles collection</dd><dt>URL</dt><dd>https://touchland.com/collections/bundles</dd><dt>Evidence</dt><dd>artifacts/touchland/collection.md — bundles grid 200, ATC in HTML; screenshot: artifacts/touchland/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Units per order rise when the bundles collection pins a “Best value” 3-mist set as the first row with explicit savings vs à la carte.</dd><dt>Primary change</dt><dd>Pinned first-row 3-mist bundle card with compare-at pricing and “Best value” label above the full grid.</dd><dt>Primary KPI</dt><dd>Units per order (bundles collection sessions)</dd><dt>Decision rule</dt><dd>Ship if units per order rise by ≥0.25 over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+7–14%</dd><dt>Confidence</dt><dd>73</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">71% conf</span><span class="pill pill-lift">+13% est</span></div><h3>exp-t5e6f7g8 — Subscribe &amp; save on Power Mist refills</h3><dl><dt>Affected surface</dt><dd>Applelicious Power Mist PDP</dd><dt>URL</dt><dd>https://touchland.com/products/applelicious-power-mist</dd><dt>Evidence</dt><dd>artifacts/touchland/pdp_1.md — hero SKU PDP 200; screenshot: artifacts/touchland/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Subscription attach rate rises when Power Mist PDPs default to subscribe &amp; save with clear cadence and savings vs one-time purchase.</dd><dt>Primary change</dt><dd>Pre-select subscription on core Power Mist SKUs with one-click switch to one-time.</dd><dt>Primary KPI</dt><dd>Subscription attach rate</dd><dt>Decision rule</dt><dd>Ship if attach rate rises by ≥11% over 30 days without one-time CVR down ≥4%.</dd><dt>Expected lift</dt><dd>+9–17%</dd><dt>Confidence</dt><dd>71</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">69% conf</span><span class="pill pill-lift">+8% est</span></div><h3>exp-t6f7g8h9 — Reorder last scents module in cart</h3><dl><dt>Affected surface</dt><dd>Cart</dd><dt>URL</dt><dd>https://touchland.com/cart</dd><dt>Evidence</dt><dd>artifacts/touchland/cart.md — cart 200, ATC notes in HTML; screenshot: artifacts/touchland/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Repeat purchase rate improves when returning visitors see “Reorder your last mists” with one-click add for prior Power Mist SKUs.</dd><dt>Primary change</dt><dd>Personalized reorder strip above cart line items for recognized return sessions.</dd><dt>Primary KPI</dt><dd>90-day repeat purchase rate</dd><dt>Decision rule</dt><dd>Ship if repeat rate rises by ≥6% over 60 days among exposed returning sessions.</dd><dt>Expected lift</dt><dd>+5–11%</dd><dt>Confidence</dt><dd>69</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">72% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-t7g8h9i0 — Blog scent-education → shop modules</h3><dl><dt>Affected surface</dt><dd>Blog</dd><dt>URL</dt><dd>https://touchland.com/blogs/blogs</dd><dt>Evidence</dt><dd>artifacts/touchland/content_page.md — blog hub 200; screenshot: artifacts/touchland/screenshots/content_page_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/content_page_full.png" alt="Evidence: content_page_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Organic traffic from scent/wellness queries converts better when blog index cards link to paired Power Mist PDPs with one-click add.</dd><dt>Primary change</dt><dd>Shoppable module on top six blog cards with mist thumbnails and deep links.</dd><dt>Primary KPI</dt><dd>Blog landing conversion rate</dd><dt>Decision rule</dt><dd>Ship if blog CVR rises by ≥7% over 28 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+6–12%</dd><dt>Confidence</dt><dd>72</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">70% conf</span><span class="pill pill-lift">+6% est</span></div><h3>exp-t8h9i0j1 — FAQ bundle CTA for first-time buyers</h3><dl><dt>Affected surface</dt><dd>FAQ</dd><dt>URL</dt><dd>https://touchland.com/pages/faq</dd><dt>Evidence</dt><dd>artifacts/touchland/faq_or_where_to_buy.md — FAQ 200; screenshot: artifacts/touchland/screenshots/faq_or_where_to_buy_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/faq_or_where_to_buy_full.png" alt="Evidence: faq_or_where_to_buy_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>FAQ→purchase conversion rises when “Which scent is right for me?” answers include a shoppable bundles collection CTA.</dd><dt>Primary change</dt><dd>Inline bundle card below top FAQ accordion linking to `/collections/bundles`.</dd><dt>Primary KPI</dt><dd>FAQ page conversion rate</dd><dt>Decision rule</dt><dd>Ship if FAQ CVR rises by ≥5% over 28 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+4–9%</dd><dt>Confidence</dt><dd>70</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">76% conf</span><span class="pill pill-lift">+8% est</span></div><h3>exp-t9i0j1k2 — Mobile meta tags and LCP pass</h3><dl><dt>Affected surface</dt><dd>Homepage</dd><dt>URL</dt><dd>https://touchland.com</dd><dt>Evidence</dt><dd>artifacts/touchland/tech_grounded.json — meta title/description/OG missing in static fetch; desktop PSI 68/100, mobile timed out; screenshot: artifacts/touchland/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Mobile bounce and social CTR improve when server-rendered title, meta description, OG tags exist and hero LCP image is compressed/preloaded.</dd><dt>Primary change</dt><dd>SSR meta tags + WebP hero with fetchpriority=high; defer below-fold collab carousels.</dd><dt>Primary KPI</dt><dd>Mobile bounce rate</dd><dt>Decision rule</dt><dd>Ship if bounce falls by ≥5% and social link CTR rises by ≥8% over 21 days.</dd><dt>Expected lift</dt><dd>+5–11%</dd><dt>Confidence</dt><dd>76</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">75% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-t0j1k2l3 — Cross-sell Beach Coco on Applelicious cart add</h3><dl><dt>Affected surface</dt><dd>Cart drawer / Applelicious PDP</dd><dt>URL</dt><dd>https://touchland.com/products/applelicious-power-mist</dd><dt>Evidence</dt><dd>artifacts/touchland/pdp_1.md and artifacts/touchland/pdp_2.md — paired hero mists from crawl; screenshot: artifacts/touchland/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/touchland/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Attach rate rises when adding Applelicious triggers a cart-drawer cross-sell to Beach Coco at bundle discount (“Build your duo”).</dd><dt>Primary change</dt><dd>Post-add cart drawer module recommending Beach Coco with one-click add.</dd><dt>Primary KPI</dt><dd>Attach rate (Applelicious add-to-cart sessions)</dd><dt>Decision rule</dt><dd>Ship if attach rate rises by ≥9% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+6–13%</dd><dt>Confidence</dt><dd>75</dd></dl></div>
+    </section>
+
+    <section>
+      <h2>Competitor analysis</h2>
+      <div class="table-wrap"><table>
+<tr><th>Competitor</th><th>Domain</th><th>Positioning</th><th>What they make easier</th><th>Touchland edge</th><th>Pattern to adapt</th></tr>
+<tr><td>Bath &amp; Body Works</td><td>bathandbodyworks.com</td><td>Mass fragrance + sanitizer</td><td>Variety and gift sets</td><td>Premium mist format + collabs</td><td>Scent families as collection landing</td></tr>
+<tr><td>Merci Handy</td><td>mercihandy.com</td><td>Design-led hand sanitizer</td><td>Playful packaging</td><td>US DTC scale + Disney/Hello Kitty</td><td>Limited-edition hero rotation</td></tr>
+<tr><td>Grown Alchemist</td><td>grownalchemist.com</td><td>Premium personal care</td><td>Spa-like upsell</td><td>On-the-go mist form factor</td><td>PDP cross-sell to cases/bundles</td></tr>
+<tr><td>Byredo</td><td>byredo.com</td><td>Luxury scent</td><td>Brand prestige</td><td>Accessible price + function</td><td>Sample/mini first-purchase sets</td></tr>
+</table></div>
+    </section>
+
+    <section>
+      <h2>Technical checks</h2>
+      <div class="table-wrap"><table>
+<tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+<tr><td>SSL Certificate</td><td><span class="status-Pass">Pass</span></td><td>Valid to Aug 2026 (`tech_grounded.json`)</td></tr>
+<tr><td>HTTPS Redirect</td><td><span class="status-Pass">Pass</span></td><td>HTTP 301 to HTTPS</td></tr>
+<tr><td>Sitemap</td><td><span class="status-Pass">Pass</span></td><td>/sitemap.xml returns 200</td></tr>
+<tr><td>Robots.txt</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Critical Pages Loading</td><td><span class="status-Pass">Pass</span></td><td>7/7 manifest surfaces 200 (audited touchland.com; touchlandusa.com did not resolve)</td></tr>
+<tr><td>Meta Tags &amp; Social Previews</td><td><span class="status-Warn">Warn</span></td><td>Title, description, OG missing in static homepage fetch; favicon not found</td></tr>
+<tr><td>Structured Data</td><td><span class="status-Warn">Warn</span></td><td>Product JSON-LD not validated on crawled PDPs this pass</td></tr>
+<tr><td>Favicon</td><td><span class="status-Warn">Warn</span></td><td>Not detected in homepage meta parse</td></tr>
+<tr><td>Mobile-Friendly</td><td><span class="status-Warn">Warn</span></td><td>Not run via Google mobile-friendly test</td></tr>
+<tr><td>Page Speed Mobile</td><td><span class="status-Warn">Warn</span></td><td>Could not verify — PSI read timed out (90s)</td></tr>
+<tr><td>Page Speed Desktop</td><td><span class="status-Pass">Pass</span></td><td>68/100 on PageSpeed Insights (desktop)</td></tr>
+<tr><td>Broken Links</td><td><span class="status-Pass">Pass</span></td><td>No manifest 404s on critical surfaces</td></tr>
+<tr><td>Image Optimization</td><td><span class="status-Warn">Warn</span></td><td>Desktop PSI 68; mobile not measured this run</td></tr>
+<tr><td>Cookie/Privacy</td><td><span class="status-Warn">Warn</span></td><td>Not fully inspected</td></tr>
+<tr><td>Checkout Reachable</td><td><span class="status-Pass">Pass</span></td><td>/cart 200 (`cart.md`, `screenshots/cart_full.png`)</td></tr>
+</table></div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+name: Eval reports
+
+on:
+  push:
+    paths:
+      - "reports/**"
+      - "eval/**"
+  pull_request:
+    paths:
+      - "reports/**"
+      - "eval/**"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Structural eval
+        run: |
+          for f in reports/*.md; do
+            [ -f "$f" ] && python eval/eval.py "$f" || true
+          done
+      - name: Cross-audit
+        run: python eval/cross_audit.py
+        continue-on-error: true

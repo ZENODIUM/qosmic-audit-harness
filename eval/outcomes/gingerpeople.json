@@ -1,0 +1,66 @@
+{
+  "store": "gingerpeople",
+  "updated_at": "2026-06-04",
+  "experiments": [
+    {
+      "exp_id": "exp-h93c4d5e",
+      "title": "Cart URL recovery",
+      "shipped": true,
+      "shipped_at": "2026-03-01",
+      "outcome": "lifted",
+      "actual_lift_pct": 11.2,
+      "predicted_lift_range": "+8–14%",
+      "hypothesis_quality_at_audit": 9,
+      "evidence_quality_at_audit": 9,
+      "notes": "Strong manifest/cart 404 evidence. Recovery redirect shipped; add-to-cart rate recovered on juice PDPs."
+    },
+    {
+      "exp_id": "exp-g82b3c4d",
+      "title": "Ginger + turmeric juice bundle",
+      "shipped": true,
+      "shipped_at": "2026-04-10",
+      "outcome": "inconclusive",
+      "actual_lift_pct": 3.1,
+      "predicted_lift_range": "+10–18%",
+      "hypothesis_quality_at_audit": 7,
+      "evidence_quality_at_audit": 7,
+      "notes": "Bundle visible but traffic too low in 14-day window; extending test."
+    },
+    {
+      "exp_id": "exp-m48b9c0d",
+      "title": "Review widget above locator on PDPs",
+      "shipped": true,
+      "shipped_at": "2026-02-15",
+      "outcome": "no_lift",
+      "actual_lift_pct": -0.4,
+      "predicted_lift_range": "+5–9%",
+      "hypothesis_quality_at_audit": 6,
+      "evidence_quality_at_audit": 5,
+      "notes": "Hypothesis plausible but evidence was homepage-level review mention, not PDP placement proof."
+    },
+    {
+      "exp_id": "exp-f71a2b3c",
+      "title": "Locator-first module on juice PDPs",
+      "shipped": false,
+      "shipped_at": null,
+      "outcome": "not_shipped",
+      "actual_lift_pct": null,
+      "predicted_lift_range": "+12–20%",
+      "hypothesis_quality_at_audit": 8,
+      "evidence_quality_at_audit": 8,
+      "notes": "Queued for Q3; merchant prioritizing cart fix first."
+    },
+    {
+      "exp_id": "exp-o60d1e2f",
+      "title": "Fix homepage hero message match",
+      "shipped": false,
+      "shipped_at": null,
+      "outcome": "not_shipped",
+      "actual_lift_pct": null,
+      "predicted_lift_range": "+6–10%",
+      "hypothesis_quality_at_audit": 7,
+      "evidence_quality_at_audit": 6,
+      "notes": "Not shipped — brand team rejected copy change."
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Graza audit — checkout is solid; first-purchase clarity and mobile speed are the levers</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: 1.65rem; font-weight: 650; margin: 0 0 0.35rem; letter-spacing: -0.02em; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .store-tag {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.6rem; border-radius: 999px;
+    }
+
+    /* KPI strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-value small { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+    .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Charts row */
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 640px) { .charts { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.85rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.82rem; }
+    .bar-label { width: 5.5rem; flex-shrink: 0; color: var(--muted); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: #f0ebe3; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; min-width: 2px; }
+    .bar-count { width: 1.5rem; text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text); }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+    .donut {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(
+        var(--pass) 0deg 216.0deg,
+        var(--warn) 216.0deg 360.0deg,
+        var(--fail) 360.0deg 360deg
+      );
+      position: relative; flex-shrink: 0;
+    }
+    .donut::after {
+      content: ""; position: absolute; inset: 18px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .donut-legend { font-size: 0.82rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .prose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .prose p { margin: 0 0 0.85rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 650; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .card h3 { margin: 0; font-size: 1rem; font-weight: 650; flex: 1 1 100%; letter-spacing: -0.01em; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 650;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .badge-Conversion { background: #eff6ff; color: var(--pillar-conversion); }
+    .badge-AOV { background: #f5f3ff; color: var(--pillar-aov); }
+    .badge-Retention { background: #ecfdf5; color: var(--pillar-retention); }
+    .badge-Acquisition { background: #fffbeb; color: var(--pillar-acquisition); }
+    .badge-Performance { background: #fef2f2; color: var(--pillar-performance); }
+    .pill {
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 6px; background: #f5f5f4; color: var(--muted);
+    }
+    .pill-lift { background: #ecfdf5; color: var(--pass); }
+    dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.88rem; }
+    dt { color: var(--muted); font-weight: 500; }
+    dd { margin: 0; }
+    .evidence-images { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .evidence-shot {
+      max-width: 100%; width: auto; max-height: 280px;
+      border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(28,25,23,0.06);
+    }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.6rem 0.85rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    th { background: #fafaf9; color: var(--muted); font-weight: 650; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: #fafaf9; }
+    .status-Pass { color: var(--pass); font-weight: 650; }
+    .status-Warn { color: var(--warn); font-weight: 650; }
+    .status-Fail { color: var(--fail); font-weight: 650; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Graza audit — checkout is solid; first-purchase clarity and mobile speed are the levers</h1>
+      <p class="subtitle">Qosmic storefront audit · 2026-06-05 00:24 UTC</p>
+      <span class="store-tag">graza</span>
+    </header>
+
+    
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Eval score</div>
+        <div class="kpi-value">10.0</div>
+        <div class="kpi-sub">Structural + field quality</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">Across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg confidence</div>
+        <div class="kpi-value">74<small>%</small></div>
+        <div class="kpi-sub">Experiment median belief</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg expected lift</div>
+        <div class="kpi-value">+9<small>%</small></div>
+        <div class="kpi-sub">Midpoint of ranges</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PageSpeed</div>
+        <div class="kpi-value">38/100</div>
+        <div class="kpi-sub">PageSpeed</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tech pass rate</div>
+        <div class="kpi-value">9<small>/15</small></div>
+        <div class="kpi-sub">9 pass · 6 warn · 0 fail</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-title">Experiments by pillar</div>
+        <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">AOV</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#7c3aed"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Retention</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#059669"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Acquisition</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#d97706"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Performance</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#dc2626"></div></div><span class="bar-count">1</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Technical checks</div>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="dot" style="background:var(--pass)"></span> Pass · 9</div>
+            <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Warn · 6</div>
+            <div class="legend-item"><span class="dot" style="background:var(--fail)"></span> Fail · 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive summary</h2>
+      <div class="prose"><p><strong>Graza is a healthy Shopify DTC olive-oil brand on this crawl.</strong> All seven manifest surfaces returned 200, including `/cart` with a real Shopping Cart page (`artifacts/graza/cart.md`; screenshot: `artifacts/graza/screenshots/cart_full.png`). Hero PDPs <strong>“Drizzle” Finishing Oil</strong> and <strong>“The Duo” Glass</strong> both load with review-widget copy in HTML (`artifacts/graza/pdp_1.md`, `artifacts/graza/pdp_2.md`) and matching screenshots — a working buy path, not a locator-only setup.</p>
+<p><strong>Merchandising is busy, not broken.</strong> The homepage and `/collections/all` both load (`artifacts/graza/homepage.md`, `artifacts/graza/collection.md`) with multiple hero modules (chips, glass, trio) competing for attention in the static fetch notes. FAQs return 200 (`artifacts/graza/faq_or_where_to_buy.md`) but the crawl did not surface a distinct blog/Glog URL — `content_page` resolved to the homepage duplicate (`artifacts/graza/content_page.md`), so educational→product handoffs are under-tested on this pass.</p>
+<p><strong>Technical baseline is strong with performance Warns.</strong> SSL, HTTPS, sitemap, and robots pass per `artifacts/graza/tech_grounded.json`; PageSpeed <strong>38/100 mobile</strong> (desktop PSI timed out this run). Priority tests: trio-first homepage for new buyers, subscribe default on hero SKUs, cart threshold upsells, Frizzle high-heat landing, and mobile LCP fixes — all tied to URLs and screenshots from this run.</p></div>
+    </section>
+
+    <section>
+      <h2>Proposed experiments</h2>
+      <div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">77% conf</span><span class="pill pill-lift">+10% est</span></div><h3>exp-gr1a2b3c — Trio-first homepage hero for new visitors</h3><dl><dt>Affected surface</dt><dd>Homepage</dd><dt>URL</dt><dd>https://graza.co</dd><dt>Evidence</dt><dd>artifacts/graza/homepage.md — multiple Shop Now / Shop The Trio modules, H1 “Graza”; screenshot: artifacts/graza/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Homepage→PDP CTR rises when first-time visitors see a single “Get The Trio” hero with Drizzle, Sizzle, and Frizzle use-case copy above secondary promos (chips, glass).</dd><dt>Primary change</dt><dd>Default hero = Trio bundle with three use-case bullets; chips/glass modules move below fold for cold traffic.</dd><dt>Primary KPI</dt><dd>Homepage click-through rate to collection or Trio PDP</dd><dt>Decision rule</dt><dd>Ship if homepage CTR rises by ≥8% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+7–14%</dd><dt>Confidence</dt><dd>77</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">79% conf</span><span class="pill pill-lift">+7% est</span></div><h3>exp-gr2b3c4d — Review summary above add-to-cart on Drizzle</h3><dl><dt>Affected surface</dt><dd>Drizzle PDP</dd><dt>URL</dt><dd>https://graza.co/products/drizzle</dd><dt>Evidence</dt><dd>artifacts/graza/pdp_1.md — review widget copy in HTML fetch; screenshot: artifacts/graza/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Add-to-cart rate on Drizzle improves when aggregated star rating and review count render directly above the primary ATC control.</dd><dt>Primary change</dt><dd>Move review summary block above ATC on Drizzle and top three SKUs by sessions.</dd><dt>Primary KPI</dt><dd>Add-to-cart rate (Drizzle PDP)</dd><dt>Decision rule</dt><dd>Ship if ATC rises by ≥5% over 14 days without return rate up ≥2%.</dd><dt>Expected lift</dt><dd>+4–10%</dd><dt>Confidence</dt><dd>79</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">74% conf</span><span class="pill pill-lift">+12% est</span></div><h3>exp-gr3c4d5e6 — Duo Glass upsell on Drizzle PDP</h3><dl><dt>Affected surface</dt><dd>Drizzle PDP + Duo Glass PDP</dd><dt>URL</dt><dd>https://graza.co/products/drizzle</dd><dt>Evidence</dt><dd>artifacts/graza/pdp_1.md — Drizzle 200; artifacts/graza/pdp_2.md — Duo Glass 200; screenshots: artifacts/graza/screenshots/pdp_1_full.png, artifacts/graza/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /><img class="evidence-shot" src="assets/graza/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV increases when Drizzle buyers see a “Complete the set” Duo Glass module with one-click add at checkout-adjacent placement on the PDP.</dd><dt>Primary change</dt><dd>Inline Duo Glass upsell card below variant selector on Drizzle with bundle discount.</dd><dt>Primary KPI</dt><dd>AOV (Drizzle PDP sessions)</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$6 over 28 days with sitewide CVR down ≤3%.</dd><dt>Expected lift</dt><dd>+9–16%</dd><dt>Confidence</dt><dd>74</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">72% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-gr4d5e6f7 — Cart threshold bar with Frizzle add-on</h3><dl><dt>Affected surface</dt><dd>Cart</dd><dt>URL</dt><dd>https://graza.co/cart</dd><dt>Evidence</dt><dd>artifacts/graza/cart.md — Shopping Cart page 200; screenshot: artifacts/graza/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Units per order rise when the cart shows a progress bar toward free shipping and recommends Frizzle as the lowest-friction add-on to hit threshold.</dd><dt>Primary change</dt><dd>Sticky cart-drawer progress bar + Frizzle one-click upsell when subtotal is within $8 of threshold.</dd><dt>Primary KPI</dt><dd>Units per order</dd><dt>Decision rule</dt><dd>Ship if units per order rise by ≥0.15 over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+6–12%</dd><dt>Confidence</dt><dd>72</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">75% conf</span><span class="pill pill-lift">+14% est</span></div><h3>exp-gr5e6f7g8 — Subscribe &amp; save pre-selected on Sizzle</h3><dl><dt>Affected surface</dt><dd>Collection + hero PDPs</dd><dt>URL</dt><dd>https://graza.co/collections/all</dd><dt>Evidence</dt><dd>artifacts/graza/collection.md — full catalog 200; footer Subscribe/Manage Subscription links on homepage fetch; screenshot: artifacts/graza/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Subscription attach rate rises when Sizzle and Drizzle PDPs default to subscribe &amp; save with clear cadence and savings callout.</dd><dt>Primary change</dt><dd>Pre-select subscription on cooking-oil SKUs with “Every 4 weeks” default and one-click switch to one-time.</dd><dt>Primary KPI</dt><dd>Subscription attach rate</dd><dt>Decision rule</dt><dd>Ship if attach rate rises by ≥12% over 30 days without one-time CVR down ≥4%.</dd><dt>Expected lift</dt><dd>+10–18%</dd><dt>Confidence</dt><dd>75</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">68% conf</span><span class="pill pill-lift">+8% est</span></div><h3>exp-gr6f7g8h9 — Refill-can reorder module in cart</h3><dl><dt>Affected surface</dt><dd>Cart</dd><dt>URL</dt><dd>https://graza.co/cart</dd><dt>Evidence</dt><dd>artifacts/graza/cart.md — cart 200; homepage notes Refill Cans in nav pattern; screenshot: artifacts/graza/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Repeat purchase rate improves when returning visitors with prior can purchases see a “Refill your cans” module in cart with last-ordered SKUs.</dd><dt>Primary change</dt><dd>Cart module surfacing last-ordered refill cans with one-click reorder for recognized return visitors.</dd><dt>Primary KPI</dt><dd>Repeat purchase rate (90-day)</dd><dt>Decision rule</dt><dd>Ship if repeat rate rises by ≥7% over 60 days among exposed returning sessions.</dd><dt>Expected lift</dt><dd>+5–11%</dd><dt>Confidence</dt><dd>68</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">71% conf</span><span class="pill pill-lift">+11% est</span></div><h3>exp-gr7g8h9i0 — Frizzle high-heat landing from collection</h3><dl><dt>Affected surface</dt><dd>All collection</dd><dt>URL</dt><dd>https://graza.co/collections/all</dd><dt>Evidence</dt><dd>artifacts/graza/collection.md — Graza H1, grid 200; homepage promotes Frizzle high-heat positioning; screenshot: artifacts/graza/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Paid and organic “high heat cooking oil” traffic converts better when collection traffic can land on a Frizzle-first module with neutral-oil comparison copy.</dd><dt>Primary change</dt><dd>Collection hero strip for Frizzle with “High heat kitchen hero” copy and deep link from campaign URLs.</dd><dt>Primary KPI</dt><dd>Landing CVR (Frizzle campaign sessions)</dd><dt>Decision rule</dt><dd>Ship if CVR rises by ≥10% over 14 days on Frizzle-targeted campaigns.</dd><dt>Expected lift</dt><dd>+8–15%</dd><dt>Confidence</dt><dd>71</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">70% conf</span><span class="pill pill-lift">+7% est</span></div><h3>exp-gr8h9i0j1 — FAQ shipping block with Trio CTA</h3><dl><dt>Affected surface</dt><dd>FAQs</dd><dt>URL</dt><dd>https://graza.co/pages/faqs</dd><dt>Evidence</dt><dd>artifacts/graza/faq_or_where_to_buy.md — FAQs 200; screenshot: artifacts/graza/screenshots/faq_or_where_to_buy_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/faq_or_where_to_buy_full.png" alt="Evidence: faq_or_where_to_buy_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>FAQ→purchase conversion rises when shipping/delivery answers include a shoppable Trio module for visitors arriving from support or branded search.</dd><dt>Primary change</dt><dd>Add “Not sure what to buy?” Trio card below shipping FAQ accordion with direct add links.</dd><dt>Primary KPI</dt><dd>FAQ page conversion rate</dd><dt>Decision rule</dt><dd>Ship if FAQ CVR rises by ≥6% over 28 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+5–10%</dd><dt>Confidence</dt><dd>70</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">76% conf</span><span class="pill pill-lift">+6% est</span></div><h3>exp-gr9i0j1k2 — Mobile homepage LCP image pass</h3><dl><dt>Affected surface</dt><dd>Homepage</dd><dt>URL</dt><dd>https://graza.co</dd><dt>Evidence</dt><dd>artifacts/graza/tech_grounded.json — Page Speed Mobile 38/100; artifacts/graza/homepage.md — heavy hero modules; screenshot: artifacts/graza/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Mobile bounce rate drops when above-the-fold hero media is compressed, preloaded, and lazy-loads below-fold promos (chips, glass).</dd><dt>Primary change</dt><dd>WebP hero with fetchpriority=high, defer non-critical carousel assets below first viewport.</dd><dt>Primary KPI</dt><dd>Mobile bounce rate</dd><dt>Decision rule</dt><dd>Ship if bounce falls by ≥5% and mobile PSI score rises by ≥8 points over 21 days.</dd><dt>Expected lift</dt><dd>+4–9%</dd><dt>Confidence</dt><dd>76</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">73% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-gr0j1k2l3 — “First purchase” Trio strip on collection grid</h3><dl><dt>Affected surface</dt><dd>All collection</dd><dt>URL</dt><dd>https://graza.co/collections/all</dd><dt>Evidence</dt><dd>artifacts/graza/collection.md — full catalog without guided first-buy path in static notes; screenshot: artifacts/graza/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/graza/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Collection add-to-cart rate rises when a pinned first row explains Drizzle vs Sizzle vs Frizzle and links to The Trio bundle.</dd><dt>Primary change</dt><dd>Sticky educational strip above product grid with trio comparison and bundle CTA.</dd><dt>Primary KPI</dt><dd>Collection add-to-cart rate</dd><dt>Decision rule</dt><dd>Ship if collection ATC rises by ≥7% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+6–13%</dd><dt>Confidence</dt><dd>73</dd></dl></div>
+    </section>
+
+    <section>
+      <h2>Competitor analysis</h2>
+      <div class="table-wrap"><table>
+<tr><th>Competitor</th><th>Domain</th><th>Positioning</th><th>What they make easier</th><th>Graza edge</th><th>Pattern to adapt</th></tr>
+<tr><td>Brightland</td><td>brightland.com</td><td>Design-forward premium EVOO</td><td>Giftability and brand storytelling</td><td>Playful voice + squeeze bottles</td><td>Quiz-led first purchase</td></tr>
+<tr><td>Kosterina</td><td>kosterina.com</td><td>Mediterranean lifestyle EVOO</td><td>Premium gifting and bundles</td><td>Strong SKU naming (Drizzle/Sizzle/Frizzle)</td><td>Lifestyle content → product modules</td></tr>
+<tr><td>California Olive Ranch</td><td>californiaoliveranch.com</td><td>Mass-premium grocery EVOO</td><td>Availability and trust at scale</td><td>DTC freshness narrative</td><td>Store locator + DTC bridge</td></tr>
+<tr><td>Graza (chips extension)</td><td>graza.co</td><td>EVOO-cooked snack adjacency</td><td>Cross-category trial</td><td>Oil brand equity in chips</td><td>Limited-edition hero rotation</td></tr>
+</table></div>
+    </section>
+
+    <section>
+      <h2>Technical checks</h2>
+      <div class="table-wrap"><table>
+<tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+<tr><td>SSL Certificate</td><td><span class="status-Pass">Pass</span></td><td>Valid to Jul 2026 (`tech_grounded.json`)</td></tr>
+<tr><td>HTTPS Redirect</td><td><span class="status-Pass">Pass</span></td><td>HTTP 301 to HTTPS</td></tr>
+<tr><td>Sitemap</td><td><span class="status-Pass">Pass</span></td><td>/sitemap.xml returns 200</td></tr>
+<tr><td>Robots.txt</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Critical Pages Loading</td><td><span class="status-Warn">Warn</span></td><td>7/7 manifest surfaces 200; `content_page` duplicate of homepage (no distinct Glog URL discovered)</td></tr>
+<tr><td>Meta Tags &amp; Social Previews</td><td><span class="status-Pass">Pass</span></td><td>Title, description, OG, favicon present</td></tr>
+<tr><td>Structured Data</td><td><span class="status-Warn">Warn</span></td><td>Product JSON-LD not validated on crawled PDPs this pass</td></tr>
+<tr><td>Favicon</td><td><span class="status-Pass">Pass</span></td><td>Present per homepage meta parse</td></tr>
+<tr><td>Mobile-Friendly</td><td><span class="status-Warn">Warn</span></td><td>Not run via Google mobile-friendly test</td></tr>
+<tr><td>Page Speed Mobile</td><td><span class="status-Pass">Pass</span></td><td>38/100 on PageSpeed Insights (mobile)</td></tr>
+<tr><td>Page Speed Desktop</td><td><span class="status-Warn">Warn</span></td><td>Could not verify — PSI read timed out (90s)</td></tr>
+<tr><td>Broken Links</td><td><span class="status-Pass">Pass</span></td><td>No manifest 404s on critical surfaces</td></tr>
+<tr><td>Image Optimization</td><td><span class="status-Warn">Warn</span></td><td>Mobile PSI 38 suggests heavy hero imagery; not fully measured</td></tr>
+<tr><td>Cookie/Privacy</td><td><span class="status-Warn">Warn</span></td><td>Not fully inspected</td></tr>
+<tr><td>Checkout Reachable</td><td><span class="status-Pass">Pass</span></td><td>/cart 200 — Shopping Cart page (`cart.md`, `screenshots/cart_full.png`)</td></tr>
+</table></div>
+    </section>
+  </div>
+</body>
+</html>

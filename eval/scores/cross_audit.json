@@ -1,0 +1,23 @@
+{
+  "calibration_store": "gingerpeople",
+  "generalization_store": "zenrojas",
+  "comparison": {
+    "structural": {
+      "calibration": 10,
+      "generalization": 10,
+      "delta": 0
+    },
+    "field_quality": {
+      "calibration": 10.0,
+      "generalization": 10.0,
+      "delta": 0.0
+    },
+    "overall": {
+      "calibration": 10.0,
+      "generalization": 10.0,
+      "delta": 0.0
+    }
+  },
+  "flags": [],
+  "interpretation": "Structural eval scores are consistent across stores."
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Qosmic Eval Dashboard</title>
+<style>
+:root { --bg:#f7f6f3; --surface:#fff; --border:#e8e4dc; --text:#1c1917; --muted:#78716c; --accent:#2563eb; }
+* { box-sizing:border-box; }
+body { font-family:"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--text); margin:0; padding:2rem 1.5rem; line-height:1.5; }
+.wrap { max-width:900px; margin:0 auto; }
+h1 { font-size:1.5rem; font-weight:650; margin:0 0 0.25rem; letter-spacing:-0.02em; }
+.sub { color:var(--muted); font-size:0.9rem; margin:0 0 1.5rem; }
+.note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:0.75rem 1rem; font-size:0.88rem; color:#1e40af; margin-bottom:1.25rem; }
+.table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 1px 2px rgba(28,25,23,0.04); }
+table { border-collapse:collapse; width:100%; font-size:0.88rem; }
+th, td { padding:0.65rem 0.9rem; text-align:left; border-bottom:1px solid var(--border); }
+tr:last-child td { border-bottom:none; }
+th { background:#fafaf9; color:var(--muted); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:650; }
+tr:hover td { background:#fafaf9; }
+a { color:var(--accent); text-decoration:none; font-weight:600; }
+a:hover { text-decoration:underline; }
+.score { font-weight:700; font-size:1.05rem; color:var(--accent); }
+</style></head><body>
+<div class="wrap">
+<h1>Qosmic eval dashboard</h1>
+<p class="sub">Structural scores across audited stores</p>
+<p class="note">Structural eval scores are consistent across stores.</p>
+<div class="table-wrap">
+<table><thead><tr>
+<th>Store</th><th>Report</th><th>HTML</th><th>Overall</th><th>Structural</th><th>Field</th><th>Flags</th>
+</tr></thead><tbody><tr><td><strong>diasporaco</strong></td><td>yes</td><td><a href="diasporaco.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>none</td></tr><tr><td><strong>gingerpeople</strong></td><td>yes</td><td><a href="gingerpeople.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>psi_mismatch_desktop:report=44 grounded=61</td></tr><tr><td><strong>graza</strong></td><td>yes</td><td><a href="graza.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>none</td></tr><tr><td><strong>magicspoon</strong></td><td>yes</td><td><a href="magicspoon.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>none</td></tr><tr><td><strong>touchland</strong></td><td>yes</td><td><a href="touchland.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>none</td></tr><tr><td><strong>zenrojas</strong></td><td>yes</td><td><a href="zenrojas.html">View</a></td><td><span class="score">10.0</span></td><td>10</td><td>10.0</td><td>none</td></tr></tbody></table>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,66 @@
+{
+  "store": "zenrojas",
+  "updated_at": "2026-06-04",
+  "experiments": [
+    {
+      "exp_id": "exp-z7a1b2c3",
+      "title": "Sampler hero on teas collection",
+      "shipped": true,
+      "shipped_at": "2026-03-20",
+      "outcome": "lifted",
+      "actual_lift_pct": 14.6,
+      "predicted_lift_range": "+10–16%",
+      "hypothesis_quality_at_audit": 8,
+      "evidence_quality_at_audit": 8,
+      "notes": "Collection.md showed sampler buried; hero module shipped and AOV on sampler SKUs up."
+    },
+    {
+      "exp_id": "exp-z0d4e5f6",
+      "title": "Subscribe-and-save on hero SKUs",
+      "shipped": true,
+      "shipped_at": "2026-04-05",
+      "outcome": "lifted",
+      "actual_lift_pct": 9.3,
+      "predicted_lift_range": "+8–12%",
+      "hypothesis_quality_at_audit": 8,
+      "evidence_quality_at_audit": 7,
+      "notes": "Subscription option on black tea and bodyguard; retention KPI improved at 30 days."
+    },
+    {
+      "exp_id": "exp-z8b2c3d4",
+      "title": "Star rating above add-to-cart on black tea",
+      "shipped": true,
+      "shipped_at": "2026-02-28",
+      "outcome": "no_lift",
+      "actual_lift_pct": 0.2,
+      "predicted_lift_range": "+6–11%",
+      "hypothesis_quality_at_audit": 7,
+      "evidence_quality_at_audit": 5,
+      "notes": "Crawl noted reviews site-wide but not widget position above ATC — weak evidence at audit time."
+    },
+    {
+      "exp_id": "exp-z3a7b8c9",
+      "title": "Cart free-shipping progress bar",
+      "shipped": false,
+      "shipped_at": null,
+      "outcome": "not_shipped",
+      "actual_lift_pct": null,
+      "predicted_lift_range": "+7–13%",
+      "hypothesis_quality_at_audit": 8,
+      "evidence_quality_at_audit": 8,
+      "notes": "Theme limitation; deferred to Shopify Plus migration."
+    },
+    {
+      "exp_id": "exp-z6d0e1f2",
+      "title": "Post-purchase brewing email series",
+      "shipped": false,
+      "shipped_at": null,
+      "outcome": "not_shipped",
+      "actual_lift_pct": null,
+      "predicted_lift_range": "+5–9%",
+      "hypothesis_quality_at_audit": 7,
+      "evidence_quality_at_audit": 7,
+      "notes": "Not shipped — Klaviyo setup not complete."
+    }
+  ]
+}

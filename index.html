@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qosmic Runtime Audit Harness — Project Overview</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 {
+      font-size: 1.85rem; font-weight: 650; margin: 0 0 0.35rem;
+      letter-spacing: -0.02em; color: var(--text);
+    }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin: 0; max-width: 52rem; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .tag {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.65rem; border-radius: 999px;
+    }
+    .tag-green { color: var(--pass); background: #ecfdf5; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label {
+      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem;
+    }
+    .kpi-value { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-sub { font-size: 0.76rem; color: var(--muted); margin-top: 0.25rem; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+
+    /* Workflow pipeline */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+      overflow-x: auto;
+    }
+    .pipe-step {
+      flex: 1 1 120px;
+      min-width: 110px;
+      text-align: center;
+      padding: 0.5rem 0.35rem;
+      position: relative;
+    }
+    .pipe-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -0.5rem;
+      top: 1.6rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+      font-weight: 600;
+      z-index: 1;
+    }
+    .pipe-num {
+      width: 2rem; height: 2rem; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 0.85rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.5rem;
+    }
+    .pipe-step.grounded .pipe-num { background: var(--warn); }
+    .pipe-step.eval .pipe-num { background: var(--pass); }
+    .pipe-title { font-size: 0.82rem; font-weight: 650; margin-bottom: 0.2rem; }
+    .pipe-file { font-size: 0.68rem; color: var(--muted); font-family: ui-monospace, monospace; }
+
+    .io-banner {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: 1rem; margin-top: 1rem;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: 10px; padding: 0.85rem 1.25rem;
+      font-size: 0.88rem;
+    }
+    .io-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.45rem 0.85rem;
+      font-family: ui-monospace, monospace; font-size: 0.8rem; font-weight: 600;
+    }
+    .io-arrow { color: var(--accent); font-weight: 700; font-size: 1.2rem; }
+
+    /* Phase detail cards */
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.85rem;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.65rem; }
+    .card-num {
+      width: 1.65rem; height: 1.65rem; border-radius: 50%;
+      background: #eff6ff; color: var(--accent);
+      font-size: 0.75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .card h3 { margin: 0; font-size: 0.95rem; font-weight: 650; }
+    .card p { margin: 0 0 0.5rem; font-size: 0.86rem; color: var(--muted); }
+    .card p:last-child { margin-bottom: 0; }
+    .card code, .file-list code {
+      font-size: 0.78rem; background: #f5f5f4;
+      padding: 0.12rem 0.4rem; border-radius: 4px;
+      font-family: ui-monospace, monospace; color: var(--text);
+    }
+    .file-list { margin: 0.5rem 0 0; padding: 0; list-style: none; font-size: 0.82rem; }
+    .file-list li { padding: 0.2rem 0; color: var(--muted); }
+    .file-list li::before { content: "→ "; color: var(--accent); font-weight: 600; }
+
+    /* Eval layers */
+    .eval-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 700px) { .eval-split { grid-template-columns: 1fr; } }
+    .eval-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .eval-card h3 {
+      margin: 0 0 0.5rem; font-size: 0.9rem; font-weight: 650;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .badge-auto {
+      font-size: 0.65rem; font-weight: 650; text-transform: uppercase;
+      letter-spacing: 0.04em; padding: 0.15rem 0.5rem; border-radius: 999px;
+      background: #ecfdf5; color: var(--pass);
+    }
+    .badge-manual {
+      background: #fffbeb; color: var(--warn);
+    }
+    .eval-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.84rem; color: var(--muted); }
+    .eval-card li { margin-bottom: 0.35rem; }
+
+    /* Mind map / architecture tree */
+    .mindmap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+      overflow-x: auto;
+    }
+    .mm-root {
+      text-align: center;
+      font-weight: 650; font-size: 1rem;
+      background: #eff6ff; color: var(--accent);
+      border: 2px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 0.65rem 1.25rem;
+      display: inline-block;
+      margin: 0 auto 1.25rem;
+      width: 100%;
+      max-width: 320px;
+    }
+    .mm-center { display: flex; justify-content: center; }
+    .mm-branches {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 800px) { .mm-branches { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .mm-branches { grid-template-columns: 1fr; } }
+    .mm-branch {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem;
+      background: #fafaf9;
+      position: relative;
+    }
+    .mm-branch::before {
+      content: "";
+      position: absolute;
+      top: -1.25rem; left: 50%;
+      width: 2px; height: 1.25rem;
+      background: var(--border);
+      transform: translateX(-50%);
+    }
+    .mm-branch-title {
+      font-size: 0.78rem; font-weight: 650; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--accent); margin-bottom: 0.5rem;
+    }
+    .mm-leaves { margin: 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--muted); }
+    .mm-leaves li {
+      padding: 0.2rem 0 0.2rem 0.65rem;
+      border-left: 2px solid var(--border);
+      margin-bottom: 0.15rem;
+    }
+
+    /* Pillars */
+    .pillar-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.5rem; }
+    .pillar {
+      font-size: 0.68rem; font-weight: 650; padding: 0.2rem 0.55rem;
+      border-radius: 999px; letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .pillar-C { background: #eff6ff; color: var(--pillar-conversion); }
+    .pillar-A { background: #f5f3ff; color: var(--pillar-aov); }
+    .pillar-R { background: #ecfdf5; color: var(--pillar-retention); }
+    .pillar-Ac { background: #fffbeb; color: var(--pillar-acquisition); }
+    .pillar-P { background: #fef2f2; color: var(--pillar-performance); }
+
+    /* Quick start */
+    .prompt-box {
+      background: #1c1917; color: #f5f5f4;
+      border-radius: 12px; padding: 1.1rem 1.25rem;
+      font-family: ui-monospace, monospace; font-size: 0.88rem;
+      box-shadow: 0 2px 8px rgba(28,25,23,0.12);
+    }
+    .prompt-label {
+      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #a8a29e; margin-bottom: 0.5rem;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    .prompt-box .highlight { color: #93c5fd; }
+
+    /* Links grid */
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .link-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.15rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .link-card:hover {
+      border-color: #bfdbfe;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    }
+    .link-card strong { display: block; font-size: 0.9rem; color: var(--accent); margin-bottom: 0.25rem; }
+    .link-card span { font-size: 0.8rem; color: var(--muted); }
+
+    .note {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 10px; padding: 0.85rem 1.1rem;
+      font-size: 0.86rem; color: #92400e; margin-top: 1rem;
+    }
+    .note strong { color: #78350f; }
+
+    footer {
+      margin-top: 2.5rem; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--muted);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Qosmic Runtime Audit Harness</h1>
+      <p class="subtitle">
+        One storefront URL in → structured CRO audit out. A markdown harness plus thin Python scripts
+        that turns any coding agent into a Qosmic-style audit agent — with automated eval.
+      </p>
+      <div class="tag-row">
+        <span class="tag">Cursor / Claude Code / Codex</span>
+        <span class="tag">Shopify storefronts</span>
+        <span class="tag-green tag">~3h 10m build</span>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Input</div>
+        <div class="kpi-value">1</div>
+        <div class="kpi-sub">storefront URL</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Phases</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub">crawl → reason → grounded → write → eval</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Surfaces</div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-sub">per crawl + screenshots</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Stores audited</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub">2 required + 3 demos</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Workflow — end to end</h2>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-num">1</div>
+          <div class="pipe-title">Crawl</div>
+          <div class="pipe-file">discover_store.py</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">2</div>
+          <div class="pipe-title">Reason</div>
+          <div class="pipe-file">skills/reason.md</div>
+        </div>
+        <div class="pipe-step grounded">
+          <div class="pipe-num">3</div>
+          <div class="pipe-title">Grounded</div>
+          <div class="pipe-file">eval/grounded.py</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">4</div>
+          <div class="pipe-title">Write</div>
+          <div class="pipe-file">skills/write.md</div>
+        </div>
+        <div class="pipe-step eval">
+          <div class="pipe-num">5</div>
+          <div class="pipe-title">Evaluate</div>
+          <div class="pipe-file">post_audit.py</div>
+        </div>
+      </div>
+      <div class="io-banner">
+        <span class="io-box">https://zenrojas.com</span>
+        <span class="io-arrow">→</span>
+        <span class="io-box">artifacts/{slug}/</span>
+        <span class="io-arrow">→</span>
+        <span class="io-box">reports/{slug}.md</span>
+        <span class="io-arrow">→</span>
+        <span class="io-box">reports/{slug}.html + eval/scores/</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase details — what each step produces</h2>
+      <div class="phase-grid">
+        <div class="card">
+          <div class="card-head"><span class="card-num">1</span><h3>Crawl</h3></div>
+          <p>Discover 7 representative surfaces from homepage + sitemap. Text artifacts + full-page screenshots.</p>
+          <ul class="file-list">
+            <li><code>artifacts/{slug}/manifest.json</code></li>
+            <li><code>artifacts/{slug}/*.md</code> (7 surfaces)</li>
+            <li><code>artifacts/{slug}/screenshots/*.png</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-num">2</span><h3>Reason</h3></div>
+          <p>Agent analyzes artifacts. Drafts 10 experiments, competitors, revenue leaks. No <code>target_report.md</code>.</p>
+          <div class="pillar-row">
+            <span class="pillar pillar-C">Conversion</span>
+            <span class="pillar pillar-A">AOV</span>
+            <span class="pillar pillar-R">Retention</span>
+            <span class="pillar pillar-Ac">Acquisition</span>
+            <span class="pillar pillar-P">Performance</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-num">3</span><h3>Grounded checks</h3></div>
+          <p>Real SSL, sitemap, PSI scores — required <strong>before</strong> write. Never fake a Pass.</p>
+          <ul class="file-list">
+            <li><code>artifacts/{slug}/tech_grounded.json</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-num">4</span><h3>Write</h3></div>
+          <p>Canonical markdown report: executive summary, 10 experiments, competitors, technical checks.</p>
+          <ul class="file-list">
+            <li><code>reports/{slug}.md</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-num">5</span><h3>Evaluate</h3></div>
+          <p>Structural scoring, cross-audit, HTML render, dashboard — no extra LLM tokens.</p>
+          <ul class="file-list">
+            <li><code>eval/scores/{slug}.json</code></li>
+            <li><code>reports/{slug}.html</code></li>
+            <li><code>reports/index.html</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Architecture mind map</h2>
+      <div class="mindmap">
+        <div class="mm-center">
+          <div class="mm-root">AGENTS.md + .cursor/rules/qosmic.mdc</div>
+        </div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <div class="mm-branch-title">Skills</div>
+            <ul class="mm-leaves">
+              <li>skills/crawl.md</li>
+              <li>skills/reason.md</li>
+              <li>skills/write.md</li>
+              <li>skills/evaluate.md</li>
+            </ul>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-title">Scripts</div>
+            <ul class="mm-leaves">
+              <li>discover_store.py</li>
+              <li>screenshot_lib.py</li>
+              <li>post_audit.py</li>
+              <li>render_report.py</li>
+            </ul>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-title">Eval</div>
+            <ul class="mm-leaves">
+              <li>eval.py (structural)</li>
+              <li>grounded.py (tech)</li>
+              <li>cross_audit.py</li>
+              <li>pattern_tracker.py</li>
+              <li>calibrate_rubric.py</li>
+            </ul>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-title">Outputs</div>
+            <ul class="mm-leaves">
+              <li>artifacts/{slug}/</li>
+              <li>reports/{slug}.md</li>
+              <li>reports/{slug}.html</li>
+              <li>eval/scores/</li>
+              <li>eval/outcomes/</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Eval system — automatic vs manual</h2>
+      <div class="eval-split">
+        <div class="eval-card">
+          <h3><span class="badge-auto">Automatic</span> After every audit</h3>
+          <ul>
+            <li><strong>Structural eval</strong> — <code>eval/eval.py</code> via <code>post_audit.py</code></li>
+            <li><strong>Grounded checks</strong> — SSL, PSI, sitemap (before write)</li>
+            <li><strong>Cross-audit</strong> — gingerpeople vs zenrojas</li>
+            <li><strong>HTML render</strong> — template, no LLM</li>
+          </ul>
+        </div>
+        <div class="eval-card">
+          <h3><span class="badge-auto badge-manual">Manual</span> Self-improvement loop</h3>
+          <ul>
+            <li><strong>pattern_tracker.py</strong> — recurring flags across stores</li>
+            <li><strong>calibrate_rubric.py</strong> — outcome-driven rubric patches</li>
+            <li><strong>run_full_eval.py</strong> — full verdict JSON</li>
+            <li><strong>eval/outcomes/</strong> — human merchant experiment data</li>
+          </ul>
+        </div>
+      </div>
+      <p style="font-size:0.84rem;color:var(--muted);margin-top:0.85rem;">
+        Truth hierarchy: experiment outcomes &gt; grounded checks &gt; judge consensus &gt; human spot-check.
+        See <code>EVAL_LOOP.md</code> for the Month 1–3 autonomy plan.
+      </p>
+    </section>
+
+    <section>
+      <h2>Quick start — one prompt</h2>
+      <div class="prompt-box">
+        <div class="prompt-label">Cursor Agent</div>
+        <span class="highlight">Qosmic audit:</span> https://zenrojas.com
+      </div>
+      <div class="note">
+        <strong>Rule #1:</strong> The agent never reads <code>target_report.md</code> during audits.
+        That file is human calibration only — recruiters check for copy-paste.
+      </div>
+    </section>
+
+    <section>
+      <h2>Explore the repo</h2>
+      <div class="link-grid">
+        <a class="link-card" href="reports/index.html">
+          <strong>Eval dashboard</strong>
+          <span>Structural scores for all 5 stores</span>
+        </a>
+        <a class="link-card" href="reports/zenrojas.html">
+          <strong>zenrojas audit</strong>
+          <span>Generalization store (HTML)</span>
+        </a>
+        <a class="link-card" href="reports/gingerpeople.html">
+          <strong>gingerpeople audit</strong>
+          <span>Calibration store (HTML)</span>
+        </a>
+        <a class="link-card" href="reports/graza.html">
+          <strong>graza demo</strong>
+          <span>Extra generalization proof</span>
+        </a>
+        <a class="link-card" href="README.md">
+          <strong>README.md</strong>
+          <span>Setup, commands, runtime</span>
+        </a>
+        <a class="link-card" href="AGENT_LOG.md">
+          <strong>AGENT_LOG.md</strong>
+          <span>Time, prompts, agent vs human</span>
+        </a>
+        <a class="link-card" href="WORKFLOWS.md">
+          <strong>WORKFLOWS.md</strong>
+          <span>How I use coding agents day-to-day</span>
+        </a>
+        <a class="link-card" href="EVAL_LOOP.md">
+          <strong>EVAL_LOOP.md</strong>
+          <span>Autonomy + self-learning plan</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Test stores</h2>
+      <div class="card" style="margin-bottom:0;">
+        <p style="margin:0 0 0.65rem;font-size:0.88rem;">
+          <strong style="color:var(--text);">Calibration:</strong>
+          <a href="https://gingerpeople.com" target="_blank" rel="noopener">gingerpeople.com</a>
+          — retailer routing, cart 404, Destini locator
+        </p>
+        <p style="margin:0;font-size:0.88rem;">
+          <strong style="color:var(--text);">Generalization:</strong>
+          <a href="https://zenrojas.com" target="_blank" rel="noopener">zenrojas.com</a>
+          — DTC Shopify, cart 200, different experiment set
+        </p>
+        <p style="margin:0.75rem 0 0;font-size:0.82rem;color:var(--muted);">
+          Same harness and skills for both — only the URL changes. Cross-audit delta: 0.0.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      Qosmic take-home submission · Harness = <code>AGENTS.md</code> + <code>skills/</code> + <code>scripts/</code> + <code>eval/</code>
+      · Open <code>index.html</code> first, then dive into reports.
+    </footer>
+  </div>
+</body>
+</html>

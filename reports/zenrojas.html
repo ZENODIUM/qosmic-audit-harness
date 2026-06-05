@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zen Rojas audit — DTC checkout works; FAQ outage and first-purchase guidance are the gaps</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: 1.65rem; font-weight: 650; margin: 0 0 0.35rem; letter-spacing: -0.02em; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .store-tag {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.6rem; border-radius: 999px;
+    }
+
+    /* KPI strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-value small { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+    .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Charts row */
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 640px) { .charts { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.85rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.82rem; }
+    .bar-label { width: 5.5rem; flex-shrink: 0; color: var(--muted); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: #f0ebe3; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; min-width: 2px; }
+    .bar-count { width: 1.5rem; text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text); }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+    .donut {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(
+        var(--pass) 0deg 168.0deg,
+        var(--warn) 168.0deg 360.0deg,
+        var(--fail) 360.0deg 360deg
+      );
+      position: relative; flex-shrink: 0;
+    }
+    .donut::after {
+      content: ""; position: absolute; inset: 18px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .donut-legend { font-size: 0.82rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .prose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .prose p { margin: 0 0 0.85rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 650; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .card h3 { margin: 0; font-size: 1rem; font-weight: 650; flex: 1 1 100%; letter-spacing: -0.01em; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 650;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .badge-Conversion { background: #eff6ff; color: var(--pillar-conversion); }
+    .badge-AOV { background: #f5f3ff; color: var(--pillar-aov); }
+    .badge-Retention { background: #ecfdf5; color: var(--pillar-retention); }
+    .badge-Acquisition { background: #fffbeb; color: var(--pillar-acquisition); }
+    .badge-Performance { background: #fef2f2; color: var(--pillar-performance); }
+    .pill {
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 6px; background: #f5f5f4; color: var(--muted);
+    }
+    .pill-lift { background: #ecfdf5; color: var(--pass); }
+    dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.88rem; }
+    dt { color: var(--muted); font-weight: 500; }
+    dd { margin: 0; }
+    .evidence-images { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .evidence-shot {
+      max-width: 100%; width: auto; max-height: 280px;
+      border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(28,25,23,0.06);
+    }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.6rem 0.85rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    th { background: #fafaf9; color: var(--muted); font-weight: 650; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: #fafaf9; }
+    .status-Pass { color: var(--pass); font-weight: 650; }
+    .status-Warn { color: var(--warn); font-weight: 650; }
+    .status-Fail { color: var(--fail); font-weight: 650; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Zen Rojas audit — DTC checkout works; FAQ outage and first-purchase guidance are the gaps</h1>
+      <p class="subtitle">Qosmic storefront audit · 2026-06-05 00:24 UTC</p>
+      <span class="store-tag">zenrojas</span>
+    </header>
+
+    
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Eval score</div>
+        <div class="kpi-value">10.0</div>
+        <div class="kpi-sub">Structural + field quality</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">Across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg confidence</div>
+        <div class="kpi-value">73<small>%</small></div>
+        <div class="kpi-sub">Experiment median belief</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg expected lift</div>
+        <div class="kpi-value">+10<small>%</small></div>
+        <div class="kpi-sub">Midpoint of ranges</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PageSpeed</div>
+        <div class="kpi-value">66/78</div>
+        <div class="kpi-sub">mobile &amp; desktop</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tech pass rate</div>
+        <div class="kpi-value">7<small>/15</small></div>
+        <div class="kpi-sub">7 pass · 8 warn · 0 fail</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-title">Experiments by pillar</div>
+        <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">AOV</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#7c3aed"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Retention</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#059669"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Acquisition</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#d97706"></div></div><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">Performance</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#dc2626"></div></div><span class="bar-count">1</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Technical checks</div>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="dot" style="background:var(--pass)"></span> Pass · 7</div>
+            <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Warn · 8</div>
+            <div class="legend-item"><span class="dot" style="background:var(--fail)"></span> Fail · 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive summary</h2>
+      <div class="prose"><p><strong>Zen Rojas is a functional Shopify DTC tea shop on this crawl.</strong> Six of seven manifest surfaces returned 200, including `/cart` with a real Shopping Cart page (`artifacts/zenrojas/cart.md`; screenshot: `artifacts/zenrojas/screenshots/cart_full.png`). Hero PDPs <strong>Organic Black Tea</strong> and <strong>Bodyguard Organic Tea</strong> both show add-to-cart in HTML (`artifacts/zenrojas/pdp_1.md`, `artifacts/zenrojas/pdp_2.md`) with matching screenshots — unlike retailer-routed brands where cart and ATC are absent.</p>
+<p><strong>Merchandising and reliability—not checkout plumbing—is the main leak.</strong> The teas collection and homepage load (`artifacts/zenrojas/collection.md`, `artifacts/zenrojas/homepage.md`) but the crawl notes no sampler-first hero or guided first-purchase path. <strong>`/pages/faqs` returned 503</strong> this run (`artifacts/zenrojas/faq_or_where_to_buy.md`; screenshot shows Shopify error page), which hurts trust and blocks FAQ→product handoffs. The weekly blog hub loads (`artifacts/zenrojas/content_page.md`) without an obvious shoppable module in static notes.</p>
+<p><strong>Technical baseline is mostly fine with Warns.</strong> HTTPS, sitemap, and robots pass per `artifacts/zenrojas/tech_grounded.json`; SSL verification failed locally; PageSpeed <strong>66/100 mobile</strong>, <strong>78/100 desktop</strong>. Priority tests: fix FAQ availability, sampler-led collection, subscription on hero SKUs, cart threshold merchandising, and blog→product modules — all tied to URLs and screenshots from this run.</p></div>
+    </section>
+
+    <section>
+      <h2>Proposed experiments</h2>
+      <div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">76% conf</span><span class="pill pill-lift">+11% est</span></div><h3>exp-z7a1b2c3 — Sampler hero on teas collection</h3><dl><dt>Affected surface</dt><dd>Teas collection</dd><dt>URL</dt><dd>https://zenrojas.com/collections/teas</dd><dt>Evidence</dt><dd>artifacts/zenrojas/collection.md — Teas H1, grid 200; screenshot: artifacts/zenrojas/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Collection-to-PDP CTR rises when tea-bag and loose-leaf sampler SKUs sit in a hero row above the full grid.</dd><dt>Primary change</dt><dd>Hero with two sampler products and “New to Zen Rojas?” copy linking to a working FAQ or quiz page.</dd><dt>Primary KPI</dt><dd>Collection click-through rate</dd><dt>Decision rule</dt><dd>Ship if CTR rises by ≥9% over 21 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+8–15%</dd><dt>Confidence</dt><dd>76</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">78% conf</span><span class="pill pill-lift">+6% est</span></div><h3>exp-z8b2c3d4 — Star rating above add-to-cart on black tea</h3><dl><dt>Affected surface</dt><dd>Organic Black Tea PDP</dd><dt>URL</dt><dd>https://zenrojas.com/products/blacktea</dd><dt>Evidence</dt><dd>artifacts/zenrojas/pdp_1.md — ATC and review copy in HTML; screenshot: artifacts/zenrojas/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Add-to-cart rate on the black tea PDP improves when aggregated stars render directly above the ATC button.</dd><dt>Primary change</dt><dd>Review summary block moved above ATC on top five SKUs by sessions.</dd><dt>Primary KPI</dt><dd>Add-to-cart rate (black tea PDP)</dd><dt>Decision rule</dt><dd>Ship if ATC rises by ≥5% over 14 days without return rate up ≥2%.</dd><dt>Expected lift</dt><dd>+4–9%</dd><dt>Confidence</dt><dd>78</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">73% conf</span><span class="pill pill-lift">+13% est</span></div><h3>exp-z9c3d4e5 — Immunity duo bundle (black + bodyguard)</h3><dl><dt>Affected surface</dt><dd>Bodyguard PDP + cart upsell</dd><dt>URL</dt><dd>https://zenrojas.com/products/bodyguardtea</dd><dt>Evidence</dt><dd>artifacts/zenrojas/pdp_2.md — Bodyguard PDP 200; screenshot: artifacts/zenrojas/screenshots/pdp_2_full.png; paired with pdp_1 from sitemap<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV increases when “Daily Defense Duo” bundles black tea and Bodyguard at 10% off with one-click add from either PDP.</dd><dt>Primary change</dt><dd>Bundle SKU + cart-drawer upsell after either SKU added.</dd><dt>Primary KPI</dt><dd>AOV (bundle-exposed sessions)</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$5 over 28 days with sitewide CVR down ≤3%.</dd><dt>Expected lift</dt><dd>+10–17%</dd><dt>Confidence</dt><dd>73</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">71% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-z0d4e5f6 — Subscribe-and-save on hero SKUs</h3><dl><dt>Affected surface</dt><dd>Black tea and Bodyguard PDPs</dd><dt>URL</dt><dd>https://zenrojas.com/products/blacktea</dd><dt>Evidence</dt><dd>artifacts/zenrojas/pdp_1.md — standard ATC present; screenshot: artifacts/zenrojas/screenshots/pdp_1_full.png; no subscription option in HTML notes<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>60-day repeat purchase rate improves when Subscribe &amp; Save (10% off, skip anytime) is enabled on the two crawled hero teas.</dd><dt>Primary change</dt><dd>Shopify subscription widget on blacktea and bodyguardtea PDPs.</dd><dt>Primary KPI</dt><dd>60-day repeat purchase rate</dd><dt>Decision rule</dt><dd>Ship if repeat rate rises by ≥7% over 90 days with churn refunds up ≤1%.</dd><dt>Expected lift</dt><dd>+6–13%</dd><dt>Confidence</dt><dd>71</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">75% conf</span><span class="pill pill-lift">+15% est</span></div><h3>exp-z1e5f6a7 — Tea finder quiz landing</h3><dl><dt>Affected surface</dt><dd>New `/find-your-tea/` page</dd><dt>URL</dt><dd>https://zenrojas.com/pages/find-your-tea (new)</dd><dt>Evidence</dt><dd>artifacts/zenrojas/collection.md — many SKUs without guided path; screenshot: artifacts/zenrojas/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Paid and organic landing CVR beats `/collections/teas` when a four-question quiz routes to black tea, bodyguard, or samplers.</dd><dt>Primary change</dt><dd>Quiz (caffeine, flavor, format, gift vs self) with deep links to discovered PDPs.</dd><dt>Primary KPI</dt><dd>Landing-page purchase conversion rate</dd><dt>Decision rule</dt><dd>Ship if LP CVR beats collection baseline by ≥11% over 30 days.</dd><dt>Expected lift</dt><dd>+11–19%</dd><dt>Confidence</dt><dd>75</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">70% conf</span><span class="pill pill-lift">+11% est</span></div><h3>exp-z2f6a7b8 — Weekly blog shoppable footer</h3><dl><dt>Affected surface</dt><dd>Weekly blog hub</dd><dt>URL</dt><dd>https://zenrojas.com/blogs/weekly-blog</dd><dt>Evidence</dt><dd>artifacts/zenrojas/content_page.md — blog index 200; screenshot: artifacts/zenrojas/screenshots/content_page_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/content_page_full.png" alt="Evidence: content_page_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Blog-session purchase rate rises when each featured post ends with one “brew this week” product card.</dd><dt>Primary change</dt><dd>Standard blog footer module linking to black tea or rotating sampler.</dd><dt>Primary KPI</dt><dd>Blog session conversion rate</dd><dt>Decision rule</dt><dd>Ship if blog CVR rises by ≥8% over 45 days.</dd><dt>Expected lift</dt><dd>+8–14%</dd><dt>Confidence</dt><dd>70</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">77% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-z3a7b8c9 — Cart free-shipping progress bar</h3><dl><dt>Affected surface</dt><dd>Cart</dd><dt>URL</dt><dd>https://zenrojas.com/cart</dd><dt>Evidence</dt><dd>artifacts/zenrojas/cart.md — Shopping Cart H1, status 200; screenshot: artifacts/zenrojas/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV rises when a dynamic “Add $X for free shipping” bar suggests a low-cost tea add-on before checkout.</dd><dt>Primary change</dt><dd>Progress bar + one-click sampler add in cart template.</dd><dt>Primary KPI</dt><dd>AOV</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$4 over 21 days with abandonment up ≤2%.</dd><dt>Expected lift</dt><dd>+7–12%</dd><dt>Confidence</dt><dd>77</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">72% conf</span><span class="pill pill-lift">+8% est</span></div><h3>exp-z4b8c9d0 — Restore FAQs and add sampler strip</h3><dl><dt>Affected surface</dt><dd>FAQs</dd><dt>URL</dt><dd>https://zenrojas.com/pages/faqs</dd><dt>Evidence</dt><dd>artifacts/zenrojas/faq_or_where_to_buy.md — 503 error page this crawl; screenshot: artifacts/zenrojas/screenshots/faq_or_where_to_buy_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/faq_or_where_to_buy_full.png" alt="Evidence: faq_or_where_to_buy_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>FAQ→purchase rate improves when `/pages/faqs` loads reliably and a persistent “Still deciding? Start with the sampler” strip appears after brewing questions.</dd><dt>Primary change</dt><dd>Fix 503 root cause; sticky CTA to sampler collection or PDP on working FAQ template.</dd><dt>Primary KPI</dt><dd>FAQ page load success rate + FAQ → add-to-cart rate</dd><dt>Decision rule</dt><dd>Ship if FAQ 503 rate is 0% for 14 days and FAQ ATC rises by ≥10% over 28 days after fix.</dd><dt>Expected lift</dt><dd>+6–11%</dd><dt>Confidence</dt><dd>72</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">74% conf</span><span class="pill pill-lift">+7% est</span></div><h3>exp-z5c9d0e1 — Caffeine and format filters on collection</h3><dl><dt>Affected surface</dt><dd>Teas collection UX</dd><dt>URL</dt><dd>https://zenrojas.com/collections/teas</dd><dt>Evidence</dt><dd>artifacts/zenrojas/collection.md — single grid, no filter chips in notes; screenshot: artifacts/zenrojas/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Collection bounce drops when shoppers filter by caffeine level, bag vs loose, and organic certification.</dd><dt>Primary change</dt><dd>Shopify collection filters + default sort “Best for beginners.”</dd><dt>Primary KPI</dt><dd>Collection bounce rate</dd><dt>Decision rule</dt><dd>Ship if bounce falls by ≥5% over 21 days without hurting pages per session.</dd><dt>Expected lift</dt><dd>+5–10%</dd><dt>Confidence</dt><dd>74</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">68% conf</span><span class="pill pill-lift">+11% est</span></div><h3>exp-z6d0e1f2 — Post-purchase brewing email series</h3><dl><dt>Affected surface</dt><dd>Post-purchase email (Klaviyo)</dd><dt>URL</dt><dd>https://zenrojas.com/ (onsite purchase trigger)</dd><dt>Evidence</dt><dd>artifacts/zenrojas/cart.md — checkout path exists (200); screenshot: artifacts/zenrojas/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/zenrojas/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>45-day repeat purchase rate improves with a three-email series (brew guide → complementary SKU → subscribe offer) keyed to first SKU purchased.</dd><dt>Primary change</dt><dd>Flow for black tea vs herbal (bodyguard) purchasers with SKU-specific content.</dd><dt>Primary KPI</dt><dd>45-day repeat purchase rate</dd><dt>Decision rule</dt><dd>Ship if repeat rate rises by ≥8% over 60 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+8–15%</dd><dt>Confidence</dt><dd>68</dd></dl></div>
+    </section>
+
+    <section>
+      <h2>Competitor analysis</h2>
+      <div class="table-wrap"><table>
+<tr><th>Competitor</th><th>Domain</th><th>Positioning</th><th>What they make easier</th><th>Zen Rojas edge</th><th>Pattern to adapt</th></tr>
+<tr><td>Harney &amp; Sons</td><td>harney.com</td><td>Premium tea discovery</td><td>Samplers, gift sets, caffeine labels</td><td>Boutique organic story</td><td>Sampler-first collection</td></tr>
+<tr><td>Art of Tea</td><td>artoftea.com</td><td>Specialty loose leaf</td><td>Subscription and education</td><td>Direct founder brand</td><td>Subscribe on hero PDPs</td></tr>
+<tr><td>Rishi Tea</td><td>rishi-tea.com</td><td>Organic specialty tea</td><td>Origin stories per SKU</td><td>Bodyguard immunity positioning</td><td>PDP storytelling + bundle</td></tr>
+<tr><td>Adagio Teas</td><td>adagio.com</td><td>Custom blends and samplers</td><td>Flavor search and trial sets</td><td>Curated organic catalog</td><td>Quiz landing for first purchase</td></tr>
+</table></div>
+    </section>
+
+    <section>
+      <h2>Technical checks</h2>
+      <div class="table-wrap"><table>
+<tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+<tr><td>SSL Certificate</td><td><span class="status-Warn">Warn</span></td><td>Could not verify — local SSL trust error (`tech_grounded.json`)</td></tr>
+<tr><td>HTTPS Redirect</td><td><span class="status-Pass">Pass</span></td><td>HTTP redirects to HTTPS (301)</td></tr>
+<tr><td>Sitemap</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Robots.txt</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Critical Pages Loading</td><td><span class="status-Warn">Warn</span></td><td>6/7 manifest surfaces 200; `/pages/faqs` returned 503 (`faq_or_where_to_buy.md`)</td></tr>
+<tr><td>Meta Tags &amp; Social Previews</td><td><span class="status-Pass">Pass</span></td><td>Title, description, OG present; favicon not found</td></tr>
+<tr><td>Structured Data</td><td><span class="status-Warn">Warn</span></td><td>Product JSON-LD not validated on crawled PDPs this pass</td></tr>
+<tr><td>Favicon</td><td><span class="status-Warn">Warn</span></td><td>Not detected in homepage meta parse</td></tr>
+<tr><td>Mobile-Friendly</td><td><span class="status-Warn">Warn</span></td><td>Not measured this run</td></tr>
+<tr><td>Page Speed Mobile</td><td><span class="status-Pass">Pass</span></td><td>66/100 on PageSpeed Insights (mobile)</td></tr>
+<tr><td>Page Speed Desktop</td><td><span class="status-Pass">Pass</span></td><td>78/100 on PageSpeed Insights (desktop)</td></tr>
+<tr><td>Broken Links</td><td><span class="status-Warn">Warn</span></td><td>FAQ page 503 on manifest URL</td></tr>
+<tr><td>Image Optimization</td><td><span class="status-Warn">Warn</span></td><td>Not measured</td></tr>
+<tr><td>Cookie/Privacy</td><td><span class="status-Warn">Warn</span></td><td>Not fully inspected</td></tr>
+<tr><td>Checkout Reachable</td><td><span class="status-Pass">Pass</span></td><td>/cart 200 — Shopping Cart page (`cart.md`, `screenshots/cart_full.png`)</td></tr>
+</table></div>
+    </section>
+  </div>
+</body>
+</html>

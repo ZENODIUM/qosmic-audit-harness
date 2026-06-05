@@ -1,0 +1,62 @@
+{
+  "confidence": "low",
+  "data_summary": {
+    "total_experiments": 10,
+    "shipped_count": 6,
+    "lifted_count": 3,
+    "no_lift_count": 2,
+    "inconclusive_count": 1,
+    "stores_with_outcomes": 2
+  },
+  "patterns": [
+    {
+      "pattern": "evidence_quality_vs_outcome",
+      "lifted_avg": 8.0,
+      "no_lift_avg": 5.0,
+      "interpretation": "Lifted experiments averaged evidence quality 8.0/10 vs 5.0/10 for no-lift."
+    },
+    {
+      "pattern": "hypothesis_quality_vs_outcome",
+      "lifted_avg": 8.33,
+      "no_lift_avg": 6.5,
+      "interpretation": "Lifted experiments averaged hypothesis quality 8.33/10 vs 6.5/10 for no-lift."
+    },
+    {
+      "pattern": "surface_specific_evidence",
+      "lifted_high_evidence_count": 2,
+      "no_lift_low_evidence_count": 2,
+      "interpretation": "Shipped winners tended to cite cart/PDP/collection artifacts; no-lift cases often had homepage-level or unverified widget claims."
+    }
+  ],
+  "suggested_rubric_updates": [
+    {
+      "dimension": "evidence_specificity",
+      "section": "eval/rubric.md \u2014 evidence_specificity",
+      "proposed_change": "[low confidence \u2014 review before applying] Tighten 9\u201310 band: require artifact path naming a specific surface (cart.md, pdp_1.md, collection.md) \u2014 not homepage-only mentions. Downgrade to <=5 when evidence is site-wide copy without surface proof.",
+      "trigger": "Lifted avg evidence 8.0 vs no-lift avg 5.0"
+    },
+    {
+      "dimension": "evidence_specificity",
+      "section": "skills/reason.md \u2014 experiment evidence rules",
+      "proposed_change": "[low confidence \u2014 review before applying] Add rule: experiments citing only homepage.md for PDP-specific UI changes should cap evidence_quality at 6 until PDP artifact confirms.",
+      "trigger": "Shipped winners tended to cite cart/PDP/collection artifacts; no-lift cases often had homepage-level or unverified widget claims."
+    },
+    {
+      "dimension": "hypothesis_falsifiability",
+      "section": "eval/rubric.md \u2014 hypothesis_falsifiability",
+      "proposed_change": "[low confidence \u2014 review before applying] When hypothesis names a UI element placement (e.g. 'reviews above ATC'), require crawl evidence of current placement \u2014 falsifiable claim needs observed baseline.",
+      "trigger": "No-lift experiments averaged evidence 5.0/10"
+    },
+    {
+      "dimension": "decision_rule_completeness",
+      "section": "eval/rubric.md \u2014 decision_rule_completeness",
+      "proposed_change": "[low confidence \u2014 review before applying] No outcome-based change yet \u2014 insufficient shipped count to correlate decision rule wording with lift. Keep structural eval numeric check; re-run calibration after more merchants report back.",
+      "trigger": "Insufficient data for decision-rule vs outcome correlation"
+    }
+  ],
+  "limitations": [
+    "Only 6 shipped experiments across 2 store(s). Need >=20 shipped experiments for reliable signal.",
+    "Only 2 store(s) with outcome data. Need >=5 stores before cross-merchant rubric changes."
+  ],
+  "generated_at": "2026-06-05T01:00:27.085852+00:00"
+}

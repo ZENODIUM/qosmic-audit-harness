@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ginger People audit — juice and turmeric PDPs work; retailer handoff and dead cart leak demand</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e4dc;
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #2563eb;
+      --pass: #059669;
+      --warn: #d97706;
+      --fail: #dc2626;
+      --pillar-conversion: #2563eb;
+      --pillar-aov: #7c3aed;
+      --pillar-retention: #059669;
+      --pillar-acquisition: #d97706;
+      --pillar-performance: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    header { margin-bottom: 2rem; }
+    h1 { font-size: 1.65rem; font-weight: 650; margin: 0 0 0.35rem; letter-spacing: -0.02em; color: var(--text); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .store-tag {
+      display: inline-block; margin-top: 0.75rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent);
+      background: #eff6ff; padding: 0.25rem 0.6rem; border-radius: 999px;
+    }
+
+    /* KPI strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .kpi-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .kpi-value small { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+    .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Charts row */
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 640px) { .charts { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .chart-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.85rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.82rem; }
+    .bar-label { width: 5.5rem; flex-shrink: 0; color: var(--muted); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: #f0ebe3; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; min-width: 2px; }
+    .bar-count { width: 1.5rem; text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text); }
+
+    /* Donut */
+    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+    .donut {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(
+        var(--pass) 0deg 192.0deg,
+        var(--warn) 192.0deg 312.0deg,
+        var(--fail) 312.0deg 360deg
+      );
+      position: relative; flex-shrink: 0;
+    }
+    .donut::after {
+      content: ""; position: absolute; inset: 18px;
+      background: var(--surface); border-radius: 50%;
+    }
+    .donut-legend { font-size: 0.82rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    section { margin-bottom: 2.25rem; }
+    h2 {
+      font-size: 0.78rem; font-weight: 650;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 0 0 1rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .prose {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .prose p { margin: 0 0 0.85rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 650; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .card h3 { margin: 0; font-size: 1rem; font-weight: 650; flex: 1 1 100%; letter-spacing: -0.01em; }
+    .badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 650;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .badge-Conversion { background: #eff6ff; color: var(--pillar-conversion); }
+    .badge-AOV { background: #f5f3ff; color: var(--pillar-aov); }
+    .badge-Retention { background: #ecfdf5; color: var(--pillar-retention); }
+    .badge-Acquisition { background: #fffbeb; color: var(--pillar-acquisition); }
+    .badge-Performance { background: #fef2f2; color: var(--pillar-performance); }
+    .pill {
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 6px; background: #f5f5f4; color: var(--muted);
+    }
+    .pill-lift { background: #ecfdf5; color: var(--pass); }
+    dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.3rem 1rem; margin: 0; font-size: 0.88rem; }
+    dt { color: var(--muted); font-weight: 500; }
+    dd { margin: 0; }
+    .evidence-images { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .evidence-shot {
+      max-width: 100%; width: auto; max-height: 280px;
+      border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(28,25,23,0.06);
+    }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(28,25,23,0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.6rem 0.85rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    th { background: #fafaf9; color: var(--muted); font-weight: 650; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:hover td { background: #fafaf9; }
+    .status-Pass { color: var(--pass); font-weight: 650; }
+    .status-Warn { color: var(--warn); font-weight: 650; }
+    .status-Fail { color: var(--fail); font-weight: 650; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Ginger People audit — juice and turmeric PDPs work; retailer handoff and dead cart leak demand</h1>
+      <p class="subtitle">Qosmic storefront audit · 2026-06-05 00:24 UTC</p>
+      <span class="store-tag">gingerpeople</span>
+    </header>
+
+    
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Eval score</div>
+        <div class="kpi-value">10.0</div>
+        <div class="kpi-sub">Structural + field quality</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Experiments</div>
+        <div class="kpi-value">10</div>
+        <div class="kpi-sub">Across 5 pillars</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg confidence</div>
+        <div class="kpi-value">73<small>%</small></div>
+        <div class="kpi-sub">Experiment median belief</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg expected lift</div>
+        <div class="kpi-value">+13<small>%</small></div>
+        <div class="kpi-sub">Midpoint of ranges</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PageSpeed</div>
+        <div class="kpi-value">31/44</div>
+        <div class="kpi-sub">mobile &amp; desktop</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tech pass rate</div>
+        <div class="kpi-value">8<small>/15</small></div>
+        <div class="kpi-sub">8 pass · 5 warn · 2 fail</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-title">Experiments by pillar</div>
+        <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">AOV</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#7c3aed"></div></div><span class="bar-count">1</span></div>
+<div class="bar-row"><span class="bar-label">Retention</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#059669"></div></div><span class="bar-count">1</span></div>
+<div class="bar-row"><span class="bar-label">Acquisition</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#d97706"></div></div><span class="bar-count">3</span></div>
+<div class="bar-row"><span class="bar-label">Performance</span><div class="bar-track"><div class="bar-fill" style="width:66%;background:#dc2626"></div></div><span class="bar-count">2</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Technical checks</div>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="donut-legend">
+            <div class="legend-item"><span class="dot" style="background:var(--pass)"></span> Pass · 8</div>
+            <div class="legend-item"><span class="dot" style="background:var(--warn)"></span> Warn · 5</div>
+            <div class="legend-item"><span class="dot" style="background:var(--fail)"></span> Fail · 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive summary</h2>
+      <div class="prose"><p><strong>This crawl found a live catalog with retailer-routed PDPs, not a broken storefront.</strong> Homepage and the products grid return 200 (`artifacts/gingerpeople/homepage.md`, `artifacts/gingerpeople/collection.md`). Sitemap-driven PDPs for <strong>Fiji Ginger Juice</strong> and <strong>Fiji Turmeric Juice</strong> also return 200 (`artifacts/gingerpeople/pdp_1.md`, `artifacts/gingerpeople/pdp_2.md`), with review copy and <strong>Destini</strong> retailer-locator scripting present — but the static HTML fetch shows <strong>no add-to-cart string</strong>, so purchase intent still depends on locator/retailer modules loading correctly.</p>
+<p><strong>`/cart` is a branded 404</strong> (`artifacts/gingerpeople/cart.md`, `manifest.json`), which is a hard performance and conversion leak for bookmarks, ads, and old Shopify links. Where To Buy loads with the same Destini pattern (`artifacts/gingerpeople/faq_or_where_to_buy.md`) while the GLP-1 education article loads cleanly (`artifacts/gingerpeople/content_page.md`) without a shoppable routine in the fetch — under-commercialized wellness traffic.</p>
+<p><strong>Technical baseline is strong; merchandising is the gap.</strong> SSL, HTTPS, sitemap, and robots pass (`artifacts/gingerpeople/tech_grounded.json`). PageSpeed <strong>31/100 mobile</strong>, <strong>44/100 desktop</strong> — slow on mobile. Priority tests: structured buy/locator module on juice PDPs, cart recovery, pairing ginger+turmeric juice on the grid, and a GLP-1 → product routine — derived from this crawl’s URLs, not a template audit.</p></div>
+    </section>
+
+    <section>
+      <h2>Proposed experiments</h2>
+      <div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">76% conf</span><span class="pill pill-lift">+14% est</span></div><h3>exp-f71a2b3c — Locator-first module on juice PDPs</h3><dl><dt>Affected surface</dt><dd>Fiji Ginger Juice PDP</dd><dt>URL</dt><dd>https://gingerpeople.com/products/fiji-ginger-juice</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/pdp_1.md — 200; Destini script referenced; no add-to-cart in HTML fetch; screenshot: artifacts/gingerpeople/screenshots/pdp_1_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/pdp_1_full.png" alt="Evidence: pdp_1_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Outbound retailer clicks rise when shoppers see an above-the-fold “Find online / near me” module with load-state handling when Destini is slow or blocked.</dd><dt>Primary change</dt><dd>Persistent locator card with fallback retailer links if widget fails to render in 2s.</dd><dt>Primary KPI</dt><dd>Outbound retailer click rate (juice PDPs)</dd><dt>Decision rule</dt><dd>Ship if clicks rise by ≥12% over 21 days at 90% confidence without PDP bounce up ≥4%.</dd><dt>Expected lift</dt><dd>+10–18%</dd><dt>Confidence</dt><dd>76</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-AOV">AOV</span><span class="pill">71% conf</span><span class="pill pill-lift">+12% est</span></div><h3>exp-g82b3c4d — Ginger + turmeric juice bundle</h3><dl><dt>Affected surface</dt><dd>Fiji juice PDPs + collection</dd><dt>URL</dt><dd>https://gingerpeople.com/products/fiji-turmeric-juice</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/pdp_2.md and pdp_1.md — adjacent SKUs via sitemap; screenshot: artifacts/gingerpeople/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>AOV increases when turmeric and ginger juice are sold as a paired “daily shot” bundle from both PDPs and the products grid.</dd><dt>Primary change</dt><dd>Bundle SKU or virtual bundle with 8% off; cross-link on both Fiji PDPs and `/the-ginger-people-products`.</dd><dt>Primary KPI</dt><dd>AOV (juice PDP sessions)</dd><dt>Decision rule</dt><dd>Ship if AOV rises by ≥$5 over 28 days with juice PDP CVR down ≤3%.</dd><dt>Expected lift</dt><dd>+9–16%</dd><dt>Confidence</dt><dd>71</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">84% conf</span><span class="pill pill-lift">+17% est</span></div><h3>exp-h93c4d5e — Cart URL recovery</h3><dl><dt>Affected surface</dt><dd>/cart</dd><dt>URL</dt><dd>https://gingerpeople.com/cart</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/cart.md — branded 404; screenshot: artifacts/gingerpeople/screenshots/cart_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/cart_full.png" alt="Evidence: cart_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Sessions that hit `/cart` convert better when 404 is replaced with recovery links to top juice PDPs, Where To Buy, and collection.</dd><dt>Primary change</dt><dd>Recovery template listing Fiji juices + locator CTA (no blank 404).</dd><dt>Primary KPI</dt><dd>/cart → retailer click rate</dd><dt>Decision rule</dt><dd>Ship if retailer clicks from /cart rise by ≥20% vs 404 baseline over 14 days.</dd><dt>Expected lift</dt><dd>+12–22%</dd><dt>Confidence</dt><dd>84</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">79% conf</span><span class="pill pill-lift">+19% est</span></div><h3>exp-i04d5e6f — Where To Buy above blog noise</h3><dl><dt>Affected surface</dt><dd>Where To Buy</dd><dt>URL</dt><dd>https://gingerpeople.com/where-to-buy-the-ginger-people-products</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/faq_or_where_to_buy.md — Destini present; screenshot: artifacts/gingerpeople/screenshots/faq_or_where_to_buy_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/faq_or_where_to_buy_full.png" alt="Evidence: faq_or_where_to_buy_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Clicks from the Where To Buy nav improve when locator and retailer cards appear before editorial/blog blocks in the DOM order.</dd><dt>Primary change</dt><dd>Reorder layout: locator + top SKUs first; move blog cards below fold on mobile.</dd><dt>Primary KPI</dt><dd>Where To Buy → retailer click rate</dd><dt>Decision rule</dt><dd>Ship if rate rises by ≥15% over 21 days.</dd><dt>Expected lift</dt><dd>+14–24%</dd><dt>Confidence</dt><dd>79</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Performance">Performance</span><span class="pill">73% conf</span><span class="pill pill-lift">+9% est</span></div><h3>exp-j15e6f7a — Products grid: format filters</h3><dl><dt>Affected surface</dt><dd>Products listing</dd><dt>URL</dt><dd>https://gingerpeople.com/the-ginger-people-products</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/collection.md — large family grid; screenshot: artifacts/gingerpeople/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Grid engagement improves when shoppers filter by format (juice, chews, lozenges, sauces) instead of scanning all families.</dd><dt>Primary change</dt><dd>Collection filters + default “Juices &amp; shots” for cold-traffic landings.</dd><dt>Primary KPI</dt><dd>Collection → PDP click-through rate</dd><dt>Decision rule</dt><dd>Ship if CTR rises by ≥7% over 28 days.</dd><dt>Expected lift</dt><dd>+6–12%</dd><dt>Confidence</dt><dd>73</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Retention">Retention</span><span class="pill">70% conf</span><span class="pill pill-lift">+10% est</span></div><h3>exp-k26f7a8b — GLP-1 article → turmeric juice routine</h3><dl><dt>Affected surface</dt><dd>GLP-1 blog post</dd><dt>URL</dt><dd>https://gingerpeople.com/boost-your-glp-1-naturally-the-power-of-ginger-turmeric</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/content_page.md — article 200; screenshot: artifacts/gingerpeople/screenshots/content_page_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/content_page_full.png" alt="Evidence: content_page_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Repeat retailer clicks from article readers increase when the post ends with a named “Ginger + Turmeric daily shot” linking to Fiji juice PDPs.</dd><dt>Primary change</dt><dd>In-article routine card with locator CTA to ginger + turmeric juices.</dd><dt>Primary KPI</dt><dd>30-day repeat click rate (article cohort)</dd><dt>Decision rule</dt><dd>Ship if repeat clicks rise by ≥8% over 60 days.</dd><dt>Expected lift</dt><dd>+7–14%</dd><dt>Confidence</dt><dd>70</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">68% conf</span><span class="pill pill-lift">+15% est</span></div><h3>exp-l37a8b9c — Cooking / juice landing from homepage</h3><dl><dt>Affected surface</dt><dd>New `/ginger-juice-cooking/` LP</dd><dt>URL</dt><dd>https://gingerpeople.com/ginger-juice-cooking/ (new)</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/homepage.md — H1/cookie-recipe hero mismatch; screenshot: artifacts/gingerpeople/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Organic “ginger juice cooking” queries convert better on a dedicated LP featuring Fiji Ginger Juice than on a generic homepage.</dd><dt>Primary change</dt><dd>LP with recipes, juice PDP hero, locator CTA; paid search alignment.</dd><dt>Primary KPI</dt><dd>Landing-page retailer click rate</dd><dt>Decision rule</dt><dd>Ship if LP beats homepage click rate by ≥10% over 30 days.</dd><dt>Expected lift</dt><dd>+11–19%</dd><dt>Confidence</dt><dd>68</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Conversion">Conversion</span><span class="pill">74% conf</span><span class="pill pill-lift">+6% est</span></div><h3>exp-m48b9c0d — Review widget above locator on PDPs</h3><dl><dt>Affected surface</dt><dd>Fiji Turmeric Juice PDP</dd><dt>URL</dt><dd>https://gingerpeople.com/products/fiji-turmeric-juice</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/pdp_2.md — review copy in HTML; screenshot: artifacts/gingerpeople/screenshots/pdp_2_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/pdp_2_full.png" alt="Evidence: pdp_2_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Locator clicks increase when star rating block renders immediately above the Destini widget on juice PDPs.</dd><dt>Primary change</dt><dd>Force review summary DOM order before locator on top 10 SKUs by traffic.</dd><dt>Primary KPI</dt><dd>Locator engagement rate</dd><dt>Decision rule</dt><dd>Ship if engagement rises by ≥5% over 14 days at 90% confidence.</dd><dt>Expected lift</dt><dd>+4–9%</dd><dt>Confidence</dt><dd>74</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">65% conf</span><span class="pill pill-lift">+22% est</span></div><h3>exp-n59c0d1e — Bulk ingredients CTA from collection</h3><dl><dt>Affected surface</dt><dd>Products grid + bulk nav</dd><dt>URL</dt><dd>https://gingerpeople.com/the-ginger-people-products</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/collection.md — B2B/bulk nav theme; screenshot: artifacts/gingerpeople/screenshots/collection_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/collection_full.png" alt="Evidence: collection_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>B2B inquiry rate rises when the products page adds a persistent “Food service / bulk” strip with email capture.</dd><dt>Primary change</dt><dd>Bulk strip with category links and one-field lead form.</dd><dt>Primary KPI</dt><dd>Bulk lead form submissions</dd><dt>Decision rule</dt><dd>Ship if submissions rise by ≥25% over 45 days without DTC click fall ≥5%.</dd><dt>Expected lift</dt><dd>+15–30%</dd><dt>Confidence</dt><dd>65</dd></dl></div>
+<div class="card"><div class="card-head"><span class="badge badge-Acquisition">Acquisition</span><span class="pill">72% conf</span><span class="pill pill-lift">+7% est</span></div><h3>exp-o60d1e2f — Fix homepage hero message match</h3><dl><dt>Affected surface</dt><dd>Homepage hero</dd><dt>URL</dt><dd>https://gingerpeople.com/</dd><dt>Evidence</dt><dd>artifacts/gingerpeople/homepage.md — title vs H1 mismatch; screenshot: artifacts/gingerpeople/screenshots/homepage_full.png<div class="evidence-images"><img class="evidence-shot" src="assets/gingerpeople/homepage_full.png" alt="Evidence: homepage_full.png" loading="lazy" /></div></dd><dt>Hypothesis</dt><dd>Homepage bounce falls when hero H1/CTA match the brand promise (functional foods) and route to juice or candy missions.</dd><dt>Primary change</dt><dd>Replace mismatched H1; dual CTA: “Shop juices” / “Shop candy”.</dd><dt>Primary KPI</dt><dd>Homepage bounce rate</dd><dt>Decision rule</dt><dd>Ship if bounce drops by ≥5% over 21 days.</dd><dt>Expected lift</dt><dd>+5–10%</dd><dt>Confidence</dt><dd>72</dd></dl></div>
+    </section>
+
+    <section>
+      <h2>Competitor analysis</h2>
+      <div class="table-wrap"><table>
+<tr><th>Competitor</th><th>Domain</th><th>Positioning</th><th>What they make easier</th><th>Ginger People edge</th><th>Pattern to adapt</th></tr>
+<tr><td>The Ginger People UK</td><td>gingerpeople.co.uk</td><td>Same brand, regional</td><td>Clear regional storefront</td><td>US catalog depth</td><td>Consistent locator UX</td></tr>
+<tr><td>Buderim Ginger</td><td>buderimginger.com</td><td>Australian ginger foods</td><td>Origin story + retail finder</td><td>US share, GLP-1 content</td><td>Locator fallback links</td></tr>
+<tr><td>Dynamic Health</td><td>dynamichealth.com</td><td>Ginger juice shots</td><td>Simple supplement PDPs</td><td>Branded Fiji juice story</td><td>Single-SKU hero PDP clarity</td></tr>
+<tr><td>MONIN</td><td>monin.com</td><td>Beverage ingredients</td><td>B2B discovery</td><td>Consumer brand trust</td><td>Bulk strip on collection</td></tr>
+</table></div>
+    </section>
+
+    <section>
+      <h2>Technical checks</h2>
+      <div class="table-wrap"><table>
+<tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+<tr><td>SSL Certificate</td><td><span class="status-Pass">Pass</span></td><td>Valid to Jul 2026 (`tech_grounded.json`)</td></tr>
+<tr><td>HTTPS Redirect</td><td><span class="status-Pass">Pass</span></td><td>HTTP 301 to HTTPS</td></tr>
+<tr><td>Sitemap</td><td><span class="status-Pass">Pass</span></td><td>/sitemap.xml 200; used for PDP discovery</td></tr>
+<tr><td>Robots.txt</td><td><span class="status-Pass">Pass</span></td><td>Returns 200</td></tr>
+<tr><td>Critical Pages Loading</td><td><span class="status-Warn">Warn</span></td><td>Juice PDPs, collection, Where To Buy, blog 200; `/cart` 404</td></tr>
+<tr><td>Meta Tags &amp; Social Previews</td><td><span class="status-Pass">Pass</span></td><td>Title, description, OG, favicon on homepage</td></tr>
+<tr><td>Structured Data</td><td><span class="status-Warn">Warn</span></td><td>Not validated on Fiji juice PDPs this pass</td></tr>
+<tr><td>Favicon</td><td><span class="status-Pass">Pass</span></td><td>Present</td></tr>
+<tr><td>Mobile-Friendly</td><td><span class="status-Warn">Warn</span></td><td>Not run via Google test</td></tr>
+<tr><td>Page Speed Mobile</td><td><span class="status-Pass">Pass</span></td><td>31/100 on PageSpeed Insights (mobile)</td></tr>
+<tr><td>Page Speed Desktop</td><td><span class="status-Pass">Pass</span></td><td>44/100 on PageSpeed Insights (desktop)</td></tr>
+<tr><td>Broken Links</td><td><span class="status-Fail">Fail</span></td><td>`/cart` branded 404 (cart.md, manifest)</td></tr>
+<tr><td>Image Optimization</td><td><span class="status-Warn">Warn</span></td><td>Not measured</td></tr>
+<tr><td>Cookie/Privacy</td><td><span class="status-Warn">Warn</span></td><td>Not fully inspected</td></tr>
+<tr><td>Checkout Reachable</td><td><span class="status-Fail">Fail</span></td><td>No cart; Destini/retailer path only</td></tr>
+</table></div>
+    </section>
+  </div>
+</body>
+</html>

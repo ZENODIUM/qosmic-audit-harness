@@ -1,0 +1,39 @@
+{
+  "store": "gingerpeople",
+  "generated_at": "2026-06-05T01:21:23.642553+00:00",
+  "structural_scores": {
+    "structural": 10,
+    "field_quality": 10.0,
+    "overall": 10.0,
+    "flags": [
+      "psi_mismatch_desktop:report=44 grounded=61"
+    ]
+  },
+  "grounded_warns": [],
+  "cross_audit": {
+    "calibration_store": "gingerpeople",
+    "generalization_store": "zenrojas",
+    "comparison": {
+      "structural": {
+        "calibration": 10,
+        "generalization": 10,
+        "delta": 0
+      },
+      "field_quality": {
+        "calibration": 10.0,
+        "generalization": 10.0,
+        "delta": 0.0
+      },
+      "overall": {
+        "calibration": 10.0,
+        "generalization": 10.0,
+        "delta": 0.0
+      }
+    },
+    "flags": [],
+    "interpretation": "Structural eval scores are consistent across stores."
+  },
+  "recurring_patterns": [],
+  "judge_verdict": null,
+  "gap_threshold": 2
+}

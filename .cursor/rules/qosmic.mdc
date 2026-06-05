@@ -1,0 +1,24 @@
+---
+description: Qosmic storefront audit — follow AGENTS.md and skills (crawl → reason → write)
+alwaysApply: true
+---
+
+# Qosmic audit harness
+
+This repo is the **Qosmic runtime audit harness**. When the user asks to audit, crawl, or review a **storefront URL** (Shopify or e-commerce):
+
+1. Read and follow `AGENTS.md` and skills in **strict order**:
+   - **Crawl** → `skills/crawl.md` — run `python scripts/discover_store.py https://{store}` (includes **required** screenshots for all 7 surfaces)
+   - **Reason** → `skills/reason.md`
+   - **Grounded checks (required)** → `python eval/grounded.py --url https://{store} --out artifacts/{slug}/tech_grounded.json` **before** write
+   - **Write** → `skills/write.md`
+   - **Evaluate** → `skills/evaluate.md` (run `python scripts/post_audit.py {slug}` in terminal — required, same flow)
+2. **Rule #1:** **Do not read `target_report.md` during audits.** Recruiters check for copy-paste from that calibration file. Derive only from this run's `artifacts/{slug}/`.
+3. **Input:** one URL only. **Outputs:** `artifacts/{slug}/` (including `screenshots/*.png`), `reports/{slug}.md`, `reports/{slug}.html`, `eval/scores/{slug}.json`, and `eval/scores/cross_audit.json` when both stores exist.
+4. **Evidence:** every experiment must cite matching `.md` + `screenshot:` path from crawl.
+5. **Technical checks:** never guess Pass — use `tech_grounded.json`; PSI 429 → Warn `rate limited`.
+6. Optional: qualitative judge via `skills/evaluate.md` (section "Optional: Qualitative judge") + `eval/rubric.md` only if the user asks.
+
+For **eval-only** requests, use that judge section in `skills/evaluate.md` and `eval/rubric.md` (judge then challenger).
+
+Quality bar: assignment schema (4 sections, 10 experiments, 5 pillars) — not a copy of any sample report.
