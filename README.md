@@ -6,7 +6,7 @@ Agent-native harness that turns any coding agent into a Qosmic storefront audit 
 (live workflow diagram, architecture summary, links to all audit reports and eval scores). 
 It lives in the repo root so GitHub Pages can serve it directly without a build step.
 
-Youtube Link: https://youtu.be/KejKZ0n7om0?si=-SVp4CSjRaqFI9M8
+> **[5-min video walkthrough →](https://youtu.be/KejKZ0n7om0)**
 
 > Assignment deliverable folder is named `reports/` (assignment text says `sample_output/`; same role).
 
