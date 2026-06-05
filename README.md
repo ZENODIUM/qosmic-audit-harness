@@ -50,7 +50,7 @@ python scripts/refresh_manifest.py gingerpeople
 
 ## PageSpeed Insights API key
 
-Grounded checks call the PSI API for mobile/desktop scores. Without a key you get ~1 request per 5 seconds and often **429 rate limited**.
+Grounded checks call the PSI API for mobile/desktop scores.
 
 1. Copy `.env.example` → `.env`
 2. Set `PAGESPEED_API_KEY` (or `GOOGLE_PSI_API_KEY`) from [Google Cloud Console](https://console.cloud.google.com/apis/credentials) with PageSpeed Insights API enabled
@@ -69,7 +69,7 @@ python eval/grounded.py --url https://zenrojas.com --out artifacts/zenrojas/tech
 | Agent reason + write report | ~5–15+ min (varies) |
 | Post-audit (`post_audit.py`) | ~10s |
 
-PSI mobile and desktop run in parallel. Screenshots use one browser session with `domcontentloaded` (falls back to `load` if blank).
+PSI mobile and desktop run in parallel. 
 
 ## Post-audit (automatic in harness)
 
@@ -93,7 +93,7 @@ Runs structural eval, cross-audit (if both reports exist), HTML render, and dash
 
 ## Self-improvement (manual)
 
-After audits, `post_audit.py` runs automatically. The **learning loop** is manual — run when you want it:
+After audits, `post_audit.py` runs automatically. The **learning loop** is manual — run when you want it: (In production has to be run in intervals)
 
 ```bash
 python eval/run_full_eval.py gingerpeople    # full loop + verdict JSON
@@ -130,7 +130,6 @@ See `skills/crawl.md`.
 - Calibration: https://gingerpeople.com
 - Generalization: https://zenrojas.com
 
-**Rule #1:** **Do not read `target_report.md` during audits** — human calibration for gingerpeople only; recruiters check for copy-paste.
 
 ## Qualitative judge (optional)
 
