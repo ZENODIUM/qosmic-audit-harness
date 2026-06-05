@@ -4,6 +4,8 @@ Agent-native harness that turns any coding agent into a Qosmic storefront audit 
 
 **Start here:** open [`index.html`](index.html) in a browser for the project overview (workflow, architecture, links).
 
+Youtube Link: https://youtu.be/KejKZ0n7om0?si=-SVp4CSjRaqFI9M8
+
 > Assignment deliverable folder is named `reports/` (assignment text says `sample_output/`; same role).
 
 ## Architecture
